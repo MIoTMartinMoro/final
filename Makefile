@@ -1,4 +1,4 @@
-CONTIKI=../../../../../../
+CONTIKI=../../../../../../../
 
 TARGET = mikro-e
 CONTIKI_WITH_IPV6 = 1
@@ -8,7 +8,7 @@ VERSION? = $(shell git describe --abbrev=4 --dirty --always --tags)
 
 APPS += letmecreateiot
 
-CONTIKI_SOURCEFILES += mcp3004.c
+CONTIKI_SOURCEFILES += mcp3004.c fsm.c
 
 CFLAGS += -DDEBUG_IP=fe80:0000:0000:0000:0019:f5ff:fe89:1e32
 CFLAGS += -DVERSION=$(VERSION)

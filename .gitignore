@@ -4,3 +4,4 @@ obj_mikro-e
 *.map
 *.mikro-e
 symbols.*
+*.a

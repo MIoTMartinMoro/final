@@ -24,19 +24,19 @@ struct idappdata
 
 /* codigos de operacion (appdata.op) */
 // Clicker
-#define OP_WHOAMI_CLICKER	0x1  /* ¿Quién soy (clicker)? */
-#define OP_MESA_LLAMA		0x2  /* La mesa quiere pedir */
-#define OP_MESA_CUENTA		0x3  /* La mesa quiere la cuenta */
+#define OP_WHOAMI_CLICKER	0x01  /* ¿Quién soy (clicker)? */
+#define OP_MESA_LLAMA		0x02  /* La mesa quiere pedir */
+#define OP_MESA_CUENTA		0x03  /* La mesa quiere la cuenta */
 // IR
-#define OP_WHOAMI_IR  	    0x4  /* ¿Quién soy (IR)? */
-#define OP_PLATO_LISTO		0x5  /* Un plato está preparado */
-#define OP_PLATO_RETIRADO	0x6  /* Un plato está retirado */
+#define OP_WHOAMI_IR  	    0x04  /* ¿Quién soy (IR)? */
+#define OP_PLATO_LISTO		0x05  /* Un plato está preparado */
+#define OP_PLATO_RETIRADO	0x06  /* Un plato está retirado */
 // Pulsera
-#define OP_WHOAMI_PULSERA   0x7  /* ¿Quién soy (pulsera)? */
-#define OP_PULSERA_LLAMADA  0x8  /* Un camarero recibe un aviso de una mesas */
-#define OP_CUENTA_PEDIDA    0x9  /* Un camarero recibe un aviso de cuenta */
+#define OP_WHOAMI_PULSERA   0x07  /* ¿Quién soy (pulsera)? */
+#define OP_PULSERA_LLAMADA  0x08  /* Un camarero recibe un aviso de una mesas */
+#define OP_CUENTA_PEDIDA    0x09  /* Un camarero recibe un aviso de cuenta */
 // Servidor
-#define OP_AWAKE            0xA  /* El servidor pregunta a los dispositivos si están despiertos */
+#define OP_AWAKE            0x0A  /* El servidor pregunta a los dispositivos si están despiertos */
 // Otros
-#define OP_OK               0xE  /* OK */
-#define OP_ERROR            0xF  /* ERROR */
+#define OP_OK               0xEE  /* OK */
+#define OP_ERROR            0xFF  /* ERROR */

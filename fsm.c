@@ -13,6 +13,8 @@ void
 fsm_init (fsm_t* this, fsm_trans_t* tt)
 {
 	this->tt = tt;
+	this->ir_state = 0;
+	this->ir_new_state = 0;
 	this->current_state = tt[0].orig_state;
 }
 

@@ -3,22 +3,25 @@
 #define PUERTO_SERVIDOR 3001     /* puerto en el servidor */
 #define PUERTO_CLIENTE  3000     /* puerto en el cliente */
 
-#define IP6_CI40_CARLOS "fe80:0000:0000:0000:0019:f5ff:fe89:1e32"
+#define IP6_CI40_CARLOS "fe80::19:f5ff:fe89:1e32"
 #define IP6_CI40_ALDA ""
 #define IP6_CI40 IP6_CI40_CARLOS
 
-#define BACKLOG 10      /* numero maximo de conexiones pendientes en cola */
-
 #define MAXDATASIZE 256 /* maximo numero de bytes que podemos recibir */
 
-#define ID_HEADER_LEN (sizeof (uint8_t) * 3)
+#define MASK 0xC0
+#define IR_PREF 0x00
+#define MESA_PREF 0x60
+#define PULSERA_PREF 0x80
+
+#define ID_HEADER_LEN (sizeof(uint8_t) * 2 + sizeof(uint16_t))
 
 /* formato de la unidad de datos de aplicacion para Datagramas*/
 struct idappdata
 {
         uint8_t op;                               /* codigo de operacion */
         uint8_t id;                               /* identificador */
-        uint8_t len;                              /* longitud de datos */
+        uint16_t len;                              /* longitud de datos */
         char data[MAXDATASIZE - ID_HEADER_LEN];   /* datos */
 };
 

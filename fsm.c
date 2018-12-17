@@ -2,19 +2,20 @@
 #include "fsm.h"
 
 fsm_t*
-fsm_new (fsm_trans_t* tt)
+fsm_new (fsm_trans_t* tt, int id)
 {
 	fsm_t* this = (fsm_t*) malloc (sizeof (fsm_t));
-	fsm_init (this, tt);
+	fsm_init (this, tt, id);
 	return this;
 }
 
 void
-fsm_init (fsm_t* this, fsm_trans_t* tt)
+fsm_init (fsm_t* this, fsm_trans_t* tt, int id)
 {
 	this->tt = tt;
 	this->ir_state = 0;
 	this->ir_new_state = 0;
+	this->id_clicker = id;
 	this->current_state = tt[0].orig_state;
 }
 

@@ -14,32 +14,32 @@
 #define MESA_PREF 0x60
 #define PULSERA_PREF 0x80
 
-#define ID_HEADER_LEN (sizeof(uint8_t) * 2 + sizeof(uint16_t))
+#define ID_HEADER_LEN (sizeof(uint16_t) * 2 + sizeof(uint8_t))
 
 /* formato de la unidad de datos de aplicacion para Datagramas*/
 struct idappdata
 {
-        uint8_t op;                               /* codigo de operacion */
-        uint8_t id;                               /* identificador */
-        uint16_t len;                              /* longitud de datos */
+        uint16_t op;                              /* codigo de operacion */
+        uint16_t id;                              /* identificador */
+        uint8_t len;                              /* longitud de datos */
         char data[MAXDATASIZE - ID_HEADER_LEN];   /* datos */
 };
 
 /* codigos de operacion (appdata.op) */
 // Clicker
-#define OP_WHOAMI_CLICKER	0x01  /* ¿Quién soy (clicker)? */
-#define OP_MESA_LLAMA		0x02  /* La mesa quiere pedir */
-#define OP_MESA_CUENTA		0x03  /* La mesa quiere la cuenta */
+#define OP_WHOAMI_CLICKER   0x0001  /* ¿Quién soy (clicker)? */
+#define OP_MESA_LLAMA       0x0002  /* La mesa quiere pedir */
+#define OP_MESA_CUENTA      0x0003  /* La mesa quiere la cuenta */
 // IR
-#define OP_WHOAMI_IR  	    0x04  /* ¿Quién soy (IR)? */
-#define OP_PLATO_LISTO		0x05  /* Un plato está preparado */
-#define OP_PLATO_RETIRADO	0x06  /* Un plato está retirado */
+#define OP_WHOAMI_IR        0x0004  /* ¿Quién soy (IR)? */
+#define OP_PLATO_LISTO      0x0005  /* Un plato está preparado */
+#define OP_PLATO_RETIRADO   0x0006  /* Un plato está retirado */
 // Pulsera
-#define OP_WHOAMI_PULSERA   0x07  /* ¿Quién soy (pulsera)? */
-#define OP_PULSERA_LLAMADA  0x08  /* Un camarero recibe un aviso de una mesas */
-#define OP_CUENTA_PEDIDA    0x09  /* Un camarero recibe un aviso de cuenta */
+#define OP_WHOAMI_PULSERA   0x0007  /* ¿Quién soy (pulsera)? */
+#define OP_PULSERA_LLAMADA  0x0008  /* Un camarero recibe un aviso de una mesas */
+#define OP_CUENTA_PEDIDA    0x0009  /* Un camarero recibe un aviso de cuenta */
 // Servidor
-#define OP_AWAKE            0x0A  /* El servidor pregunta a los dispositivos si están despiertos */
+#define OP_AWAKE            0x000A  /* El servidor pregunta a los dispositivos si están despiertos */
 // Otros
-#define OP_OK               0xEE  /* OK */
-#define OP_ERROR            0xFF  /* ERROR */
+#define OP_OK               0xEEEE  /* OK */
+#define OP_ERROR            0xFFFF  /* ERROR */

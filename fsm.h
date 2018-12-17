@@ -15,13 +15,14 @@ typedef struct fsm_trans_t {
 
 struct fsm_t {
 	int current_state;
-	int ir_state;
+	int id_clicker;
 	int ir_new_state;
+	int ir_state;
 	fsm_trans_t* tt;
 };
 
-fsm_t* fsm_new (fsm_trans_t* tt);
-void fsm_init (fsm_t* this, fsm_trans_t* tt);
+fsm_t* fsm_new (fsm_trans_t* tt, int id);
+void fsm_init (fsm_t* this, fsm_trans_t* tt, int id);
 void fsm_fire (fsm_t* this);
 	
 #endif

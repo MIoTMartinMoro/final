@@ -19,8 +19,6 @@
 
 #include "fsm.h"
 
-#define SERVER_IP_ADDR "fe80:0000:0000:0000:0020:f5f8:f329:1234"
-
 
 //Funciones de salida. Hacen una acción. Devuelven void
 
@@ -75,23 +73,22 @@ AUTOSTART_PROCESSES(&main_process);
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(main_process, ev, data)
 {
-
     PROCESS_BEGIN();
     INIT_NETWORK_DEBUG();
     {
         MEMB(appdata, struct idappdata, MAXDATASIZE);
 
         static char buffer[MAXDATASIZE + 1];
+        static fsm_t* fsm;
         static struct etimer et;
         static struct idappdata* operacion;
         static struct idappdata* resultado;
         static struct uip_ip_hdr metadata;
         static struct uip_udp_conn* conn;
         static uint8_t i;
-        static uint8_t id;
-        static uint16_t minor, major; 
-
-        static fsm_t* fsm;
+        static uint8_t id_clicker = 0;
+        static uint8_t id_msg = 1;
+        static uint16_t minor, major;
 
         enum fsm_state { EMPTY, DETECTED };
         
@@ -104,16 +101,16 @@ PROCESS_THREAD(main_process, ev, data)
         operacion = memb_alloc(&appdata);
         resultado = memb_alloc(&appdata);
 
-        printf("=====Start=====\n");
+        PRINTF("=====Start=====\n");
 
         if(spi_init() < 0 ||
             spi_set_mode(MIKROBUS_1, SPI_MODE_3) < 0)
         {
-            printf("SPI init failed\n");
+            PRINTF("SPI init failed\n");
             return 1;
         }
 
-        printf("SPI init passed\n");
+        PRINTF("SPI init passed\n");
 
         int flashes = 2;
         while(flashes--) {
@@ -124,14 +121,11 @@ PROCESS_THREAD(main_process, ev, data)
             leds_toggle(LED1);
         }
 
-        if(ipv6_add_address(SERVER_IP_ADDR, NULL, NETWORK_INFINITE_LIFETIME) < 0)
-        {
-            printf("Failed to set IPV6 address\n");
-            return 1;
-        }
-        ipv6_add_default_route(IP6_CI40, NETWORK_INFINITE_LIFETIME);
         conn = udp_new_connection(PUERTO_CLIENTE, PUERTO_SERVIDOR, IP6_CI40);
         PROCESS_WAIT_UDP_CONNECTED();
+        PROCESS_WAIT_UDP_CONNECTED();
+        PROCESS_WAIT_UDP_CONNECTED();
+        ipv6_add_default_route(IP6_CI40, NETWORK_INFINITE_LIFETIME);
         
         flashes = 4;
         while(flashes--) {
@@ -142,19 +136,19 @@ PROCESS_THREAD(main_process, ev, data)
             leds_toggle(LED1);
         }
 
-        printf("Quien soy?\n");
+        PRINTF("Quien soy?\n");
 
         memset(operacion->data, '\0', MAXDATASIZE - ID_HEADER_LEN);
+        strcpy(operacion->data, "Quien soy (IR)");
         operacion->op = OP_WHOAMI_IR;
-        operacion->id = 0;
+        operacion->id = (uint16_t) ((IR_PREF + id_clicker) << 8) + id_msg;
         operacion->len = strlen(operacion->data);
 
-        printf("OP: 0x%X\nID: %ld\nLen: %ld\nData: %s\n", operacion->op, operacion->id, operacion->len, operacion->data);
+        PRINTF("(Enviado) OP: 0x%X ID: %ld Len: %ld Data: %s\n", operacion->op, operacion->id, operacion->len, operacion->data);
 
         leds_on(LED1);
         leds_on(LED2);
         udp_packet_send(conn, (char*) operacion, ID_HEADER_LEN + operacion->len);
-
         PROCESS_WAIT_UDP_SENT();
         leds_off(LED1);
         PROCESS_WAIT_UDP_RECEIVED();
@@ -162,17 +156,17 @@ PROCESS_THREAD(main_process, ev, data)
         memset(buffer, '\0', MAXDATASIZE + 1);
         udp_packet_receive(buffer, MAXDATASIZE, &metadata);
 
-        printf("buffer: %s\n", buffer);
+        resultado = (struct idappdata*) &buffer;
 
+        id_clicker = (uint8_t) (IR_PREF + (uint8_t) strtol(resultado->data, NULL, 10));
 
-        fsm = fsm_new(sensor_ir);
+        PRINTF("(Recibido) OP: 0x%X ID: %ld Len: %ld Data: %s\n", resultado->op, resultado->id, resultado->len, resultado->data);
 
-        printf("********FSM CREADA********\n");
-        leds_off(LED2); 
+        fsm = fsm_new(sensor_ir, id_clicker);
 
+        PRINTF("********FSM CREADA********\n");
 
-
-        printf("Starting loop\n");
+        PRINTF("Starting loop\n");
 
         while(1)
         {
@@ -181,12 +175,6 @@ PROCESS_THREAD(main_process, ev, data)
             fsm_fire(fsm);
 
             PROCESS_WAIT_EVENT();
-
-            /*
-
-            sprintf(buffer, "Voltage channel%ld: %i.%02i\n", channel, major, minor);
-*/
-
         }
 
         spi_release();

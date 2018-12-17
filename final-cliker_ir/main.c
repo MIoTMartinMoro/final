@@ -14,14 +14,10 @@
 #include "lib/memb.h"
 
 #include "common.h"
+#include "fsm.h"
 #include "mcp3004.h"
 
-
-#include "fsm.h"
-
-
 //Funciones de salida. Hacen una acción. Devuelven void
-
 void send_alert(fsm_t* fsm){
     printf("Plato listo para llevar \n");
     leds_on(LED1);

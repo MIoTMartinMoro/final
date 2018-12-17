@@ -14,6 +14,7 @@ CFLAGS += -DDEBUG_IP=fe80:0000:0000:0000:0019:f5ff:fe89:1e32
 CFLAGS += -DVERSION=$(VERSION)
 CFLAGS += -Wall -Wno-pointer-sign
 CFLAGS += -I $(CONTIKI)/platform/$(TARGET)
+CFLAGS += -I ..
 CFLAGS += -fno-short-double
 LDFLAGS += -Wl,--defsym,_min_heap_size=32000
 

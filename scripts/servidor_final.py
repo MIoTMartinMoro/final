@@ -12,6 +12,16 @@ args = parser.parse_args()
 import socket
 import time
 
+def build_msg(id, data, error):
+    msg_bytes = bytes()
+    if (error):
+        msg_bytes += bytes([0xff, 0xff])
+    else:
+        msg_bytes += bytes([0xee, 0xee])
+    msg_bytes += bytes([id[0], id[1], len(data)]) + bytes(data, 'utf-8')
+
+    return msg_bytes
+
 # No IP to connect to needed for a server
 IP = "::"
 PORT = args.port
@@ -37,14 +47,10 @@ while True:
     # Print client data as it arrives. For unpacking the data or converting to a UTF-8 string see below:
     # https://docs.python.org/3.5/library/struct.html                                                   
     # https://docs.python.org/3/howto/unicode.html#the-string-type
-    msg = []
+    msg = bytes()
     if (op == 4):
-        msg.append(0xee)
-        msg.append(0xee)
-        msg.append(data[2])
-        msg.append(data[3])
-        msg.append(id_ir)
-        msg.append(len(str(id_ir)))
+        id_msg = [data[2], data[3]]
+        msg = build_msg(id_msg, str(id_ir), False)
         id_ir += 4
     time.sleep(1)
-    sock.sendto(bytes(msg), address) 
+    sock.sendto(msg, address)

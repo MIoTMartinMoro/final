@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <letmecreate/click/common.h>
 #include <letmecreate/core/spi.h>
@@ -8,6 +9,7 @@
 /* Bytes */
 #define START_BYTE   0X01
 #define CHANNEL(I)  (0x80 + I * 0x10)
+#define N_CHANNELS 4
 
 /* Equation values */
 #define VREF 5.0
@@ -27,4 +29,17 @@ int mcp3004_read_channel(uint8_t channel, float* value)
     *value = (((rx_buffer[1] & 0x3) << 8) + rx_buffer[2]) * VREF / BITS;
 
     return 0;
+}
+
+int mcp3004_read_all_channels(float* values)
+{
+    uint8_t i;
+    uint8_t n = sizeof(values) / sizeof(float);
+
+    for (i = 0; i < N_CHANNELS || i < n, i++) {
+        if (mcp3004_read_channel(i, values[i]) < 1) {
+            fprintf(stderr, "mcp3004: Failed to read data.\n");
+            return -1;
+        }
+    }
 }

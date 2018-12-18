@@ -11,5 +11,6 @@
 #define __MCP3004_H__
 
 int mcp3004_read_channel(uint8_t channel, float* value);
+int mcp3004_read_all_channels(float* values);
 
 #endif

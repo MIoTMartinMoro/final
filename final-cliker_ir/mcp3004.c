@@ -36,10 +36,12 @@ int mcp3004_read_all_channels(float* values)
     uint8_t i;
     uint8_t n = sizeof(values) / sizeof(float);
 
-    for (i = 0; i < N_CHANNELS || i < n, i++) {
-        if (mcp3004_read_channel(i, values[i]) < 1) {
+    for (i = 0; i < N_CHANNELS || i < n; i++) {
+        if (mcp3004_read_channel(i, &values[i]) < 1) {
             fprintf(stderr, "mcp3004: Failed to read data.\n");
             return -1;
         }
     }
+
+    return 0;
 }

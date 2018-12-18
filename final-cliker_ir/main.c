@@ -17,14 +17,56 @@
 #include "fsm.h"
 #include "mcp3004.h"
 
+#define UMBRAL 2
+#define N_PLATOS 4
+
+MEMB(appdata, struct idappdata, MAXDATASIZE);
+
+uint8_t convert_values(float* values)
+{
+    uint8_t n = sizeof(values) / sizeof(float);
+    uint8_t resp = 0;
+    uint8_t i;
+
+    for (i = 0; i < n; i++) {
+        if (values[i] > UMBRAL) {
+            resp |= (1 << i);
+        }
+    }
+
+    return resp;
+}
+
 //Funciones de salida. Hacen una acción. Devuelven void
-void send_alert(fsm_t* fsm){
-    printf("Plato listo para llevar \n");
+void send_alert(fsm_t* fsm)
+{
+    uint8_t i;
+    static struct idappdata* envio;
+    envio = memb_alloc(&appdata);
+
     leds_on(LED1);
-    //envío paquete UDP
-    //udp_packet_send(conn, buffer, strlen(buffer));
-    leds_on(LED1);
-    //PROCESS_WAIT_UDP_SENT();
+
+    memset(envio->data, '\0', MAXDATASIZE - ID_HEADER_LEN);
+
+    for (i = 0; i < N_PLATOS; i++) {
+        if ((fsm->ir_new_state & (1 << i)) && ((fsm->ir_new_state ^ fsm->ir_state) & (1 << i))) {
+            sprintf(envio->data, "Plato %ld detectado", i);
+            envio->op = OP_PLATO_DETECTADO;
+            envio->id = fsm->id_msg + (i << 8);
+            envio->len = strlen(envio->data);
+
+            udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
+            int flashes = 6;
+            while(flashes--) {
+                  /* Flash every second */
+                for(i = 0; i < 20; i++)
+                    clock_delay_usec(50000);
+            }
+        }
+    }
+    memb_free(&appdata, envio);
+    fsm->ir_state = fsm->ir_new_state;
+    leds_off(LED1);
 }
 
 void clear_alert(fsm_t* fsm){
@@ -35,18 +77,15 @@ void clear_alert(fsm_t* fsm){
 
 //Funciones de lectura de sensores para comprobar el cambio de estado. Devuelven 1 si queremos cambiar, 0 si no
 
-int check_sensor(fsm_t* fsm){
-    printf("comprueba valor sensor IR \n");
-    static float value = 0.0f;
-    static uint8_t channel =1;
-    mcp3004_read_channel(channel, &value);
-    printf("VALUE: %f\n", value);
-    if(value > 2){ //boton izquierda
-        printf("hay plato \n");
-        return 1;
-    }else{
-        return 0;
-    }
+int check_sensor(fsm_t* fsm)
+{
+    static float values[N_PLATOS];
+    static uint8_t ir_values;
+    mcp3004_read_all_channels(values);
+    ir_values = convert_values(values);
+    fsm->ir_new_state = ir_values;
+
+    return ir_values;
 }
 
 int check_sensor_none(fsm_t* fsm){
@@ -72,8 +111,6 @@ PROCESS_THREAD(main_process, ev, data)
     PROCESS_BEGIN();
     INIT_NETWORK_DEBUG();
     {
-        MEMB(appdata, struct idappdata, MAXDATASIZE);
-
         static char buffer[MAXDATASIZE + 1];
         static fsm_t* fsm;
         static struct etimer et;
@@ -83,14 +120,15 @@ PROCESS_THREAD(main_process, ev, data)
         static struct uip_udp_conn* conn;
         static uint8_t i;
         static uint8_t id_clicker = 0;
-        static uint8_t id_msg = 1;
+        static uint8_t id_msg = 0;
         static uint16_t minor, major;
 
         enum fsm_state { EMPTY, DETECTED };
         
         static fsm_trans_t sensor_ir[] = {
-            {EMPTY,     check_sensor,    DETECTED, send_alert},
-            {DETECTED,  check_sensor_none,   EMPTY,    clear_alert},
+            {EMPTY,     check_sensor,        DETECTED,  send_alert},
+            {DETECTED,  check_sensor_none,   EMPTY,     clear_alert},
+            {DETECTED,  check_sensor_none,   DETECTED,  clear_alert},
             {-1, NULL, -1, NULL},
         }; 
 
@@ -145,6 +183,7 @@ PROCESS_THREAD(main_process, ev, data)
         leds_on(LED1);
         leds_on(LED2);
         udp_packet_send(conn, (char*) operacion, ID_HEADER_LEN + operacion->len);
+        id_msg++;
         PROCESS_WAIT_UDP_SENT();
         leds_off(LED1);
         PROCESS_WAIT_UDP_RECEIVED();
@@ -158,7 +197,7 @@ PROCESS_THREAD(main_process, ev, data)
 
         PRINTF("(Recibido) OP: 0x%X ID: %ld Len: %ld Data: %s\n", resultado->op, resultado->id, resultado->len, resultado->data);
 
-        fsm = fsm_new(sensor_ir, id_clicker);
+        fsm = fsm_new(sensor_ir, (id_clicker << 8) + id_msg, conn);
 
         PRINTF("********FSM CREADA********\n");
 

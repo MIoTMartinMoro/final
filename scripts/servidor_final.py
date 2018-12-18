@@ -35,6 +35,8 @@ id_ir = 1
 print("Server initialised, awaiting data. Use Ctrl + C to stop")
 while True:
     data, address = sock.recvfrom(args.buffer)
+    if (data[0] == 'dummy'):
+        continue
     op = data[1] * 256 + data[0]
     id_msg = data[3] * 256 + data[2]
     len_data = data[4]
@@ -52,5 +54,5 @@ while True:
         id_msg = [data[2], data[3]]
         msg = build_msg(id_msg, str(id_ir), False)
         id_ir += 4
-    time.sleep(1)
-    sock.sendto(msg, address)
+        time.sleep(1)
+        sock.sendto(msg, address)

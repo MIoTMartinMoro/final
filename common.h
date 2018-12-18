@@ -32,7 +32,7 @@ struct idappdata
 #define OP_MESA_CUENTA      0x0003  /* La mesa quiere la cuenta */
 // IR
 #define OP_WHOAMI_IR        0x0004  /* ¿Quién soy (IR)? */
-#define OP_PLATO_LISTO      0x0005  /* Un plato está preparado */
+#define OP_PLATO_DETECTADO  0x0005  /* Un plato está preparado */
 #define OP_PLATO_RETIRADO   0x0006  /* Un plato está retirado */
 // Pulsera
 #define OP_WHOAMI_PULSERA   0x0007  /* ¿Quién soy (pulsera)? */

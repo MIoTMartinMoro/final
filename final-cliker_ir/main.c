@@ -22,9 +22,8 @@
 
 MEMB(appdata, struct idappdata, MAXDATASIZE);
 
-uint8_t convert_values(float* values)
+uint8_t convert_values(float* values, int n)
 {
-    uint8_t n = sizeof(values) / sizeof(float);
     uint8_t resp = 0;
     uint8_t i;
 
@@ -49,18 +48,23 @@ void send_alert(fsm_t* fsm)
     memset(envio->data, '\0', MAXDATASIZE - ID_HEADER_LEN);
 
     for (i = 0; i < N_PLATOS; i++) {
-        if ((fsm->ir_new_state & (1 << i)) && ((fsm->ir_new_state ^ fsm->ir_state) & (1 << i))) {
-            sprintf(envio->data, "Plato %ld detectado", i);
-            envio->op = OP_PLATO_DETECTADO;
-            envio->id = fsm->id_msg + (i << 8);
-            envio->len = strlen(envio->data);
+        if ((fsm->ir_new_state ^ fsm->ir_state) & (1 << i)) {
+            if ((fsm->ir_new_state & (1 << i))) {
+                sprintf(envio->data, "Plato %ld detectado", i);
+                envio->op = OP_PLATO_DETECTADO;
+                envio->id = fsm->id_msg + (i << 8);
+                envio->len = strlen(envio->data);
 
-            udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
-            int flashes = 6;
-            while(flashes--) {
-                  /* Flash every second */
-                for(i = 0; i < 20; i++)
-                    clock_delay_usec(50000);
+                udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
+                fsm->id_msg++;
+            } else {
+                sprintf(envio->data, "Plato %ld retirado", i);
+                envio->op = OP_PLATO_RETIRADO;
+                envio->id = fsm->id_msg + (i << 8);
+                envio->len = strlen(envio->data);
+
+                udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
+                fsm->id_msg++;
             }
         }
     }
@@ -69,37 +73,26 @@ void send_alert(fsm_t* fsm)
     leds_off(LED1);
 }
 
-void clear_alert(fsm_t* fsm){
-    printf("Nada para llevar \n");
-    //envío paquete UDP
-    leds_off(LED1);
-}
-
 //Funciones de lectura de sensores para comprobar el cambio de estado. Devuelven 1 si queremos cambiar, 0 si no
-
 int check_sensor(fsm_t* fsm)
 {
     static float values[N_PLATOS];
     static uint8_t ir_values;
-    mcp3004_read_all_channels(values);
-    ir_values = convert_values(values);
+    mcp3004_read_all_channels(values, N_PLATOS);
+    ir_values = convert_values(values, N_PLATOS);
     fsm->ir_new_state = ir_values;
 
-    return ir_values;
+    return ((fsm->ir_new_state ^ fsm->ir_state) > 0) && ir_values > 0;
 }
 
 int check_sensor_none(fsm_t* fsm){
-    printf("comprueba valor sensor IR \n");
-    static float value = 0.0f;
-    static uint8_t channel =1;
-    mcp3004_read_channel(channel, &value);
-    printf("VALUE: %f\n", value);
-    if(value < 2){ //boton izquierda
-        printf("no hay plato \n");
-        return 1;
-    }else{
-        return 0;
-    }
+    static float values[N_PLATOS];
+    static uint8_t ir_values;
+    mcp3004_read_all_channels(values, N_PLATOS);
+    ir_values = convert_values(values, N_PLATOS);
+    fsm->ir_new_state = ir_values;
+
+    return ir_values == 0;
 }
 
 
@@ -127,8 +120,8 @@ PROCESS_THREAD(main_process, ev, data)
         
         static fsm_trans_t sensor_ir[] = {
             {EMPTY,     check_sensor,        DETECTED,  send_alert},
-            {DETECTED,  check_sensor_none,   EMPTY,     clear_alert},
-            {DETECTED,  check_sensor_none,   DETECTED,  clear_alert},
+            {DETECTED,  check_sensor_none,   EMPTY,     send_alert},
+            {DETECTED,  check_sensor,        DETECTED,  send_alert},
             {-1, NULL, -1, NULL},
         }; 
 
@@ -156,8 +149,6 @@ PROCESS_THREAD(main_process, ev, data)
         }
 
         conn = udp_new_connection(PUERTO_CLIENTE, PUERTO_SERVIDOR, IP6_CI40);
-        PROCESS_WAIT_UDP_CONNECTED();
-        PROCESS_WAIT_UDP_CONNECTED();
         PROCESS_WAIT_UDP_CONNECTED();
         ipv6_add_default_route(IP6_CI40, NETWORK_INFINITE_LIFETIME);
         

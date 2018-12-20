@@ -46,6 +46,7 @@ while True:
     print("ID:" + str(id_msg))
     print("LEN:" + str(len_data))
     print("DATA:" + str(data_msg))
+    print("")
     # Print client data as it arrives. For unpacking the data or converting to a UTF-8 string see below:
     # https://docs.python.org/3.5/library/struct.html                                                   
     # https://docs.python.org/3/howto/unicode.html#the-string-type
@@ -54,5 +55,10 @@ while True:
         id_msg = [data[2], data[3]]
         msg = build_msg(id_msg, str(id_ir), False)
         id_ir += 4
+        time.sleep(1)
+        sock.sendto(msg, address)
+    else:
+        id_msg = [data[2], data[3]]
+        msg = build_msg(id_msg, "Operacion no identificada", True)
         time.sleep(1)
         sock.sendto(msg, address)

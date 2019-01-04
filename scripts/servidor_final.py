@@ -58,9 +58,9 @@ while True:
         id_ir += 4
         time.sleep(1)
         sock.sendto(msg, address)
-    if (op == 1):
+    elif (op == 1):
         id_msg = [data[2], data[3]]
-        msg = build_msg(id_msg, str(id_ir), False)
+        msg = build_msg(id_msg, str(id_mesa), False)
         id_mesa += 1
         time.sleep(1)
         sock.sendto(msg, address)

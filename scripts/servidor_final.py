@@ -31,6 +31,7 @@ sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
 sock.bind((IP, PORT))
 
 id_ir = 1
+id_mesa = 1
 
 print("Server initialised, awaiting data. Use Ctrl + C to stop")
 while True:
@@ -55,6 +56,12 @@ while True:
         id_msg = [data[2], data[3]]
         msg = build_msg(id_msg, str(id_ir), False)
         id_ir += 4
+        time.sleep(1)
+        sock.sendto(msg, address)
+    elif (op == 1):
+        id_msg = [data[2], data[3]]
+        msg = build_msg(id_msg, str(id_mesa), False)
+        id_mesa += 1
         time.sleep(1)
         sock.sendto(msg, address)
     else:

@@ -12,6 +12,7 @@
 #include "letmecreate/core/common.h"
 #include "letmecreate/core/spi.h"
 #include "lib/memb.h"
+#include "mqtt.h"
 
 #include "common.h"
 #include "fsm.h"
@@ -21,6 +22,7 @@
 #define N_PLATOS 4
 
 MEMB(appdata, struct idappdata, MAXDATASIZE);
+static struct mqtt_connection mqtt_conn;
 
 uint8_t convert_values(float* values, int n)
 {
@@ -53,16 +55,20 @@ void send_alert(fsm_t* fsm)
                 sprintf(envio->data, "Plato %ld detectado", i);
                 envio->op = OP_PLATO_DETECTADO;
                 envio->id = fsm->id_msg + (i << 8);
+                uint16_t mid = envio->id;
                 envio->len = strlen(envio->data);
 
+                mqtt_publish(&mqtt_conn, &mid, "restaurante/plato/detectado", (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
                 udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
                 fsm->id_msg++;
             } else {
                 sprintf(envio->data, "Plato %ld retirado", i);
                 envio->op = OP_PLATO_RETIRADO;
                 envio->id = fsm->id_msg + (i << 8);
+                uint16_t mid = envio->id;
                 envio->len = strlen(envio->data);
 
+                mqtt_publish(&mqtt_conn, &mid, "restaurante/plato/retirado", (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
                 udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
                 fsm->id_msg++;
             }
@@ -95,6 +101,12 @@ int check_sensor_none(fsm_t* fsm){
     return ir_values == 0;
 }
 
+static void
+mqtt_event(struct mqtt_connection *m, mqtt_event_t event, void *data)
+{
+    
+}
+
 
 PROCESS(main_process, "Main process");
 AUTOSTART_PROCESSES(&main_process);
@@ -114,7 +126,6 @@ PROCESS_THREAD(main_process, ev, data)
         static uint8_t i;
         static uint8_t id_clicker = 0;
         static uint8_t id_msg = 0;
-        static uint16_t minor, major;
 
         enum fsm_state { EMPTY, DETECTED };
         
@@ -149,6 +160,8 @@ PROCESS_THREAD(main_process, ev, data)
         }
 
         conn = udp_new_connection(PUERTO_CLIENTE, PUERTO_SERVIDOR, IP6_CI40);
+        PROCESS_WAIT_UDP_CONNECTED();
+        PROCESS_WAIT_UDP_CONNECTED();
         PROCESS_WAIT_UDP_CONNECTED();
         ipv6_add_default_route(IP6_CI40, NETWORK_INFINITE_LIFETIME);
         
@@ -187,6 +200,16 @@ PROCESS_THREAD(main_process, ev, data)
         id_clicker = (uint8_t) (IR_PREF + (uint8_t) strtol(resultado->data, NULL, 10));
 
         PRINTF("(Recibido) OP: 0x%X ID: %ld Len: %ld Data: %s\n", resultado->op, resultado->id, resultado->len, resultado->data);
+
+        if (mqtt_register(&mqtt_conn, &main_process, &id_clicker, mqtt_event, MAXDATASIZE) < 0) {
+            PRINTF("MQTT register failed\n");
+            return 1;
+        }
+
+        if (mqtt_connect(&mqtt_conn, IP6_CI40, 1883, 99) < 0) {
+            PRINTF("MQTT connect failed\n");
+            return 1;
+        }        
 
         fsm = fsm_new(sensor_ir, (id_clicker << 8) + id_msg, conn);
 

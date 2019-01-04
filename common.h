@@ -4,7 +4,7 @@
 #define PUERTO_CLIENTE  3000     /* puerto en el cliente */
 
 #define IP6_CI40_CARLOS "fe80::19:f5ff:fe89:1e32"
-#define IP6_CI40_ALDA ""
+#define IP6_CI40_ALDA "fe80::19:f5ff:fe89:1d96"
 #define IP6_CI40 IP6_CI40_CARLOS
 
 #define MAXDATASIZE 256 /* maximo numero de bytes que podemos recibir */
@@ -27,7 +27,7 @@ struct idappdata
 
 /* codigos de operacion (appdata.op) */
 // Clicker
-#define OP_WHOAMI_CLICKER   0x0001  /* ¿Quién soy (clicker)? */
+#define OP_WHOAMI_MESA	    0x0001  /* ¿Quién soy (clicker mesa)? */
 #define OP_MESA_LLAMA       0x0002  /* La mesa quiere pedir */
 #define OP_MESA_CUENTA      0x0003  /* La mesa quiere la cuenta */
 // IR

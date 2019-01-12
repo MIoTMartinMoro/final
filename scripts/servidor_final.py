@@ -56,7 +56,7 @@ while True:
     # https://docs.python.org/3.5/library/struct.html                                                   
     # https://docs.python.org/3/howto/unicode.html#the-string-type
     msg = bytes()
-    if (op == 4):
+    if (op == 6):
         id_msg = [data[2], data[3]]
         msg = build_msg(id_msg, str(id_ir), False)
         id_ir += 4
@@ -68,7 +68,7 @@ while True:
         id_mesa += 1
         time.sleep(1)
         sock.sendto(msg, address)
-    elif (op > 10):
+    elif (op > 12):
         id_msg = [data[2], data[3]]
         msg = build_msg(id_msg, "Operacion no identificada", True)
         time.sleep(1)

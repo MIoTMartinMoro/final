@@ -213,7 +213,7 @@ PROCESS_THREAD(main_process, ev, data)
             return 1;
         }        
 
-        fsm = fsm_new(sensor_ir, (id_clicker << 8) + id_msg, id_clicker, conn);
+        fsm = fsm_new(sensor_ir, id_msg, id_clicker, conn);
 
         PRINTF("********FSM CREADA********\n");
 

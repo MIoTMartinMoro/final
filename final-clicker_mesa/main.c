@@ -28,6 +28,9 @@
 #define FLAG_BUTTON_1 1
 #define FLAG_BUTTON_2 2
 
+static struct timer debouncetimer[2];
+static int button_pressed[2];
+
 
 static uint8_t buttons_flags_status = 0; //0 apagado, 1 pulsado [0] -> boton1, [1]->boton2
 
@@ -61,18 +64,46 @@ void init_buttons(){
     LATBbits.LATB0=0;    
 }
 
-
+/*---------------------------------------------------------------------------*/
+static void button_isr(int button_id, int flag)
+{
+  if (!button_pressed[button_id]) {
+    /*
+     * If timer is still running, it means the button has just been released and
+     * it is a false notification due to bouncing
+     */
+    if (timer_expired(&debouncetimer[button_id])) {
+      button_pressed[button_id] = 1;
+      /* Set a timer for 100ms to ignore false notifications due to bouncing */
+      timer_set(&debouncetimer[button_id], CLOCK_SECOND / 10);
+      /* Notify processes that button has been pressed */
+      buttons_flags_status |= flag;
+    }
+  } else {
+    /*
+     * If timer is still running, it means the button has just been pressed and
+     * it is a false notification due to bouncing
+     */
+    if (timer_expired(&debouncetimer[button_id])) {
+      button_pressed[button_id] = 0;
+      /* Set a timer for 100ms to ignore false notifications due to bouncing */
+      timer_set(&debouncetimer[button_id], CLOCK_SECOND / 10);
+    }
+  }
+}
 
 static void
 button_callback(void)
 {
     if(PORTBbits.RB0 == 0){ //boton derecha
-        buttons_flags_status |= FLAG_BUTTON_2;
-    } else if(PORTEbits.RE7 == 0){ //boton izquierda
-        buttons_flags_status |= FLAG_BUTTON_1;
+        button_isr(1, FLAG_BUTTON_2);
+    }
+    if(PORTEbits.RE7 == 0){ //boton izquierda
+        button_isr(0, FLAG_BUTTON_1);
     } 
 
 }
+
 void send_alert_occupated(fsm_t* fsm)
 {
     static struct idappdata* envio;
@@ -167,8 +198,8 @@ void send_alert_waiter_call(fsm_t* fsm)
 
 //Funciones de lectura de sensores para comprobar el cambio de estado. Devuelven 1 si queremos cambiar, 0 si no
 int check_button1(fsm_t* fsm){
-    if((buttons_flags_status && 1) == 1) {
-        buttons_flags_status &= 2;
+    if((buttons_flags_status & 1) == 1) {
+        buttons_flags_status = 0;
         return 1;
     }else{
         return 0;
@@ -176,8 +207,8 @@ int check_button1(fsm_t* fsm){
 }
 
 int check_button2(fsm_t* fsm){
-        if((buttons_flags_status && 2) == 2) {
-        buttons_flags_status &= 1;
+    if((buttons_flags_status & 2) == 2) {
+        buttons_flags_status = 0;
         return 1;
     }else{
         return 0;

@@ -17,15 +17,14 @@ typedef struct fsm_trans_t {
 
 struct fsm_t {
 	int current_state;
+	int id_mesa;
 	int id_msg;
-	int ir_new_state;
-	int ir_state;
 	struct uip_udp_conn* conn;
 	fsm_trans_t* tt;
 };
 
-fsm_t* fsm_new (fsm_trans_t* tt, int id, struct uip_udp_conn* conn);
-void fsm_init (fsm_t* this, fsm_trans_t* tt, int id, struct uip_udp_conn* conn);
+fsm_t* fsm_new (fsm_trans_t* tt, int id, int id_msg, struct uip_udp_conn* conn);
+void fsm_init (fsm_t* this, fsm_trans_t* tt, int id, int id_msg, struct uip_udp_conn* conn);
 void fsm_fire (fsm_t* this);
 	
 #endif

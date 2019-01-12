@@ -30,16 +30,25 @@ struct idappdata
 #define OP_WHOAMI_MESA	    0x0001  /* ¿Quién soy (clicker mesa)? */
 #define OP_MESA_LLAMA       0x0002  /* La mesa quiere pedir */
 #define OP_MESA_CUENTA      0x0003  /* La mesa quiere la cuenta */
+#define OP_MESA_OCUPADA     0x0004  /* La mesa quiere la cuenta */
+#define OP_MESA_VACIA       0x0005  /* La mesa quiere la cuenta */
 // IR
-#define OP_WHOAMI_IR        0x0004  /* ¿Quién soy (IR)? */
-#define OP_PLATO_DETECTADO  0x0005  /* Un plato está preparado */
-#define OP_PLATO_RETIRADO   0x0006  /* Un plato está retirado */
+#define OP_WHOAMI_IR        0x0006  /* ¿Quién soy (IR)? */
+#define OP_PLATO_DETECTADO  0x0007  /* Un plato está preparado */
+#define OP_PLATO_RETIRADO   0x0008  /* Un plato está retirado */
 // Pulsera
-#define OP_WHOAMI_PULSERA   0x0007  /* ¿Quién soy (pulsera)? */
-#define OP_PULSERA_LLAMADA  0x0008  /* Un camarero recibe un aviso de una mesas */
-#define OP_CUENTA_PEDIDA    0x0009  /* Un camarero recibe un aviso de cuenta */
+#define OP_WHOAMI_PULSERA   0x0009  /* ¿Quién soy (pulsera)? */
+#define OP_PULSERA_LLAMADA  0x000A  /* Un camarero recibe un aviso de una mesas */
+#define OP_CUENTA_PEDIDA    0x000B  /* Un camarero recibe un aviso de cuenta */
 // Servidor
-#define OP_AWAKE            0x000A  /* El servidor pregunta a los dispositivos si están despiertos */
+#define OP_AWAKE            0x000C  /* El servidor pregunta a los dispositivos si están despiertos */
 // Otros
 #define OP_OK               0xEEEE  /* OK */
 #define OP_ERROR            0xFFFF  /* ERROR */
+
+
+#define BUTTON_CHECK_IRQ(port, pin) __BUTTON_CHECK_IRQ(port, pin)
+/* Check if button1 was pressed */
+#define BUTTON1_CHECK_IRQ() BUTTON_CHECK_IRQ(BUTTON1_PORT, BUTTON1_PIN)
+#define BUTTON2_CHECK_IRQ() BUTTON_CHECK_IRQ(BUTTON2_PORT, BUTTON1_PIN)  
+/* Method to be called when button1 is pressed */

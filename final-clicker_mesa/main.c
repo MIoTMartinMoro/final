@@ -28,18 +28,6 @@
 #define FLAG_BUTTON_1 1
 #define FLAG_BUTTON_2 2
 
-/* There are two buttons on the board */
-#define BUTTON1           1
-#define BUTTON2           2
-#define NUM_OF_BUTTONS    2
-
-/* Button1 is connected to pin RE7 */
-#define BUTTON1_PORT      0xE
-#define BUTTON1_PIN       7
-
-/* Button1 is connected to pin RB0 */
-#define BUTTON2_PORT      0xB
-#define BUTTON2_PIN       0
 
 static uint8_t buttons_flags_status = 0; //0 apagado, 1 pulsado [0] -> boton1, [1]->boton2
 

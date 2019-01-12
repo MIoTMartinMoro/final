@@ -43,6 +43,7 @@ void send_alert(fsm_t* fsm)
 {
     uint8_t i;
     static struct idappdata* envio;
+    static uint8_t id_ir = 0;
     envio = memb_alloc(&appdata);
 
     leds_on(LED1);
@@ -50,11 +51,12 @@ void send_alert(fsm_t* fsm)
     memset(envio->data, '\0', MAXDATASIZE - ID_HEADER_LEN);
 
     for (i = 0; i < N_PLATOS; i++) {
+        id_ir = fsm->id_clicker + i;
         if ((fsm->ir_new_state ^ fsm->ir_state) & (1 << i)) {
             if ((fsm->ir_new_state & (1 << i))) {
-                sprintf(envio->data, "Plato %ld detectado", i);
+                sprintf(envio->data, "Plato %ld detectado", id_ir);
                 envio->op = OP_PLATO_DETECTADO;
-                envio->id = fsm->id_msg + (i << 8);
+                envio->id = fsm->id_msg + (id_ir << 8);
                 uint16_t mid = envio->id;
                 envio->len = strlen(envio->data);
 
@@ -62,9 +64,9 @@ void send_alert(fsm_t* fsm)
                 udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
                 fsm->id_msg++;
             } else {
-                sprintf(envio->data, "Plato %ld retirado", i);
+                sprintf(envio->data, "Plato %ld retirado", id_ir);
                 envio->op = OP_PLATO_RETIRADO;
-                envio->id = fsm->id_msg + (i << 8);
+                envio->id = fsm->id_msg + (id_ir << 8);
                 uint16_t mid = envio->id;
                 envio->len = strlen(envio->data);
 
@@ -211,7 +213,7 @@ PROCESS_THREAD(main_process, ev, data)
             return 1;
         }        
 
-        fsm = fsm_new(sensor_ir, (id_clicker << 8) + id_msg, conn);
+        fsm = fsm_new(sensor_ir, (id_clicker << 8) + id_msg, id_clicker, conn);
 
         PRINTF("********FSM CREADA********\n");
 

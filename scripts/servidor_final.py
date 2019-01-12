@@ -14,13 +14,21 @@ import time
 
 def build_msg(id, data, error):
     msg_bytes = bytes()
+    op = 0
     if (error):
         msg_bytes += bytes([0xff, 0xff])
+        op = "ffff"
     else:
         msg_bytes += bytes([0xee, 0xee])
+        op = "eeee"
     msg_bytes += bytes([id[0], id[1], len(data)]) + bytes(data, 'utf-8')
+    id_msg = id[1] * 256 + id[0]
+    write_msg(op, id_msg, len(data), data, "Enviado")
 
     return msg_bytes
+
+def write_msg(op, id, len, data, sentido):
+    print("[{}] ({}) OP: {} ID: {} Len: {} Data: {}".format(time.strftime("%c"), sentido, hex(int(op, base=16)), id, len, data))
 
 # No IP to connect to needed for a server
 IP = "::"
@@ -43,11 +51,7 @@ while True:
     len_data = data[4]
     data_msg = data[5:]
 
-    print("OP:" + str(op))
-    print("ID:" + str(id_msg))
-    print("LEN:" + str(len_data))
-    print("DATA:" + str(data_msg))
-    print("")
+    write_msg(str(op), str(id_msg), str(len_data), data_msg, "Recibido")
     # Print client data as it arrives. For unpacking the data or converting to a UTF-8 string see below:
     # https://docs.python.org/3.5/library/struct.html                                                   
     # https://docs.python.org/3/howto/unicode.html#the-string-type
@@ -64,7 +68,7 @@ while True:
         id_mesa += 1
         time.sleep(1)
         sock.sendto(msg, address)
-    else:
+    elif (op > 10):
         id_msg = [data[2], data[3]]
         msg = build_msg(id_msg, "Operacion no identificada", True)
         time.sleep(1)

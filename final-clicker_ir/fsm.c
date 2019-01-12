@@ -2,20 +2,21 @@
 #include "fsm.h"
 
 fsm_t*
-fsm_new (fsm_trans_t* tt, int id, struct uip_udp_conn* conn)
+fsm_new (fsm_trans_t* tt, int id_msg, int id_clicker, struct uip_udp_conn* conn)
 {
 	fsm_t* this = (fsm_t*) malloc (sizeof (fsm_t));
-	fsm_init (this, tt, id, conn);
+	fsm_init (this, tt, id_msg, id_clicker, conn);
 	return this;
 }
 
 void
-fsm_init (fsm_t* this, fsm_trans_t* tt, int id, struct uip_udp_conn* conn)
+fsm_init (fsm_t* this, fsm_trans_t* tt, int id_msg, int id_clicker, struct uip_udp_conn* conn)
 {
 	this->tt = tt;
 	this->ir_state = 0;
 	this->ir_new_state = 0;
-	this->id_msg = id;
+	this->id_msg = id_msg;
+	this->id_clicker = id_clicker;
 	this->conn = conn;
 	this->current_state = tt[0].orig_state;
 }

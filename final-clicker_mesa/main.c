@@ -30,6 +30,15 @@
 
 static struct timer debouncetimer[2];
 static int button_pressed[2];
+static uint8_t dibujos[7][8] = { 
+    { 0x00, 0x00, 0x00, 0x18, 0x18, 0x00, 0x00, 0x00 },  // Config 1
+    { 0x00, 0x00, 0x3C, 0x24, 0x24, 0x3C, 0x00, 0x00 },  // Config 2
+    { 0x00, 0x7E, 0x42, 0x42, 0x42, 0x42, 0x7E, 0x00 },  // Config 3
+    { 0xFF, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0xFF },  // Config 4
+    { 0xFF, 0xA1, 0x91, 0x89, 0x85, 0x89, 0x91, 0xFF },  // Empty
+    { 0x00, 0xC3, 0xA5, 0x99, 0x99, 0xA5, 0xC3, 0x00 },  // Waiter called
+    { 0x00, 0x22, 0x41, 0x55, 0x55, 0x55, 0x3E, 0x14 }   // Bill asked
+};
 
 
 static uint8_t buttons_flags_status = 0; //0 apagado, 1 pulsado [0] -> boton1, [1]->boton2
@@ -121,7 +130,9 @@ void send_alert_occupated(fsm_t* fsm)
 
     mqtt_publish(&mqtt_conn, &mid, "restaurante/mesa/ocupada", (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
-    fsm->id_msg++; 
+    fsm->id_msg++;
+
+    led_matrix_click_display_number(fsm->id_mesa);
     
     memb_free(&appdata, envio);
     leds_off(LED1);
@@ -144,7 +155,9 @@ void send_alert_empty(fsm_t* fsm)
 
     mqtt_publish(&mqtt_conn, &mid, "restaurante/mesa/vaciada", (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
-    fsm->id_msg++; 
+    fsm->id_msg++;
+
+    led_matrix_click_set(dibujos[4]);
     
     memb_free(&appdata, envio);
     leds_off(LED1);
@@ -168,6 +181,8 @@ void send_alert_bill(fsm_t* fsm)
     mqtt_publish(&mqtt_conn, &mid, "restaurante/mesa/cuenta", (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
     fsm->id_msg++; 
+
+    led_matrix_click_set(dibujos[6]);
     
     memb_free(&appdata, envio);
     leds_off(LED1);
@@ -193,6 +208,7 @@ void send_alert_waiter_call(fsm_t* fsm)
     fsm->id_msg++; 
     
     memb_free(&appdata, envio);
+    led_matrix_click_set(dibujos[5]);
     leds_off(LED1);
 }
 
@@ -241,8 +257,7 @@ PROCESS_THREAD(main_process, ev, data)
         static uint8_t i;
         static uint8_t id_clicker = 0;
         static uint8_t id_msg = 0;
-
-        static uint8_t num_mesa=0;
+        static uint8_t num_mesa = 0;
 
         enum fsm_state { EMPTY, OCCUPATED, BILL_ASKED, WAITER_CALLED };
         
@@ -269,17 +284,13 @@ PROCESS_THREAD(main_process, ev, data)
         }
 
         PRINTF("SPI init passed\n");
+        led_matrix_click_set(dibujos[0]);
 
 
         if(led_matrix_click_enable() < 0 ||
            led_matrix_click_set_intensity(1) < 0)
         {
             PRINTF("LED matrix init failed\n");
-            return 1;
-        }        
-
-        if(led_matrix_click_display_number(0)<0){
-            PRINTF("Led Matrix display number failed");
             return 1;
         }
 
@@ -297,6 +308,8 @@ PROCESS_THREAD(main_process, ev, data)
         PROCESS_WAIT_UDP_CONNECTED();
         PROCESS_WAIT_UDP_CONNECTED();
         ipv6_add_default_route(IP6_CI40, NETWORK_INFINITE_LIFETIME);
+
+        led_matrix_click_set(dibujos[1]);
         
         init_buttons();
 
@@ -321,6 +334,7 @@ PROCESS_THREAD(main_process, ev, data)
 
         leds_on(LED1);
         leds_on(LED2);
+        led_matrix_click_set(dibujos[2]);
         udp_packet_send(conn, (char*) operacion, ID_HEADER_LEN + operacion->len);
         id_msg++;
         PROCESS_WAIT_UDP_SENT();
@@ -329,6 +343,7 @@ PROCESS_THREAD(main_process, ev, data)
         leds_off(LED2);
         memset(buffer, '\0', MAXDATASIZE + 1);
         udp_packet_receive(buffer, MAXDATASIZE, &metadata);
+        led_matrix_click_set(dibujos[3]);
 
         resultado = (struct idappdata*) &buffer;
 
@@ -337,11 +352,6 @@ PROCESS_THREAD(main_process, ev, data)
         id_clicker = (uint8_t) (MESA_PREF + num_mesa );
 
         PRINTF("(Recibido) OP: 0x%X ID: %ld Len: %ld Data: %s\n", resultado->op, resultado->id, resultado->len, resultado->data);
-
-        if(led_matrix_click_display_number(num_mesa)<0){
-            PRINTF("Led Matrix display number failed");
-            return 1;
-        }
 
         if (mqtt_register(&mqtt_conn, &main_process, &id_clicker, mqtt_event, MAXDATASIZE) < 0) {
             PRINTF("MQTT register failed\n");
@@ -358,6 +368,8 @@ PROCESS_THREAD(main_process, ev, data)
         PRINTF("********FSM CREADA********\n");
 
         PRINTF("Starting loop\n");
+
+        led_matrix_click_set(dibujos[4]);
 
         while(1)
         {

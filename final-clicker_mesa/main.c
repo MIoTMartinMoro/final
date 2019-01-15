@@ -122,7 +122,7 @@ void send_alert_occupated(fsm_t* fsm)
 
     memset(envio->data, '\0', MAXDATASIZE - ID_HEADER_LEN);
 
-    sprintf(envio->data, "Mesa %d ocupada", fsm->id_mesa);
+    sprintf(envio->data, "Mesa %d ocupada", fsm->id_mesa & 0x3F);
     envio->op = OP_MESA_OCUPADA;
     envio->id = fsm->id_msg + (fsm->id_mesa << 8);
     uint16_t mid = envio->id;
@@ -132,7 +132,7 @@ void send_alert_occupated(fsm_t* fsm)
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
     fsm->id_msg++;
 
-    led_matrix_click_display_number(fsm->id_mesa);
+    led_matrix_click_display_number(fsm->id_mesa & 0x3F);
     
     memb_free(&appdata, envio);
     leds_off(LED1);
@@ -147,7 +147,7 @@ void send_alert_empty(fsm_t* fsm)
 
     memset(envio->data, '\0', MAXDATASIZE - ID_HEADER_LEN);
 
-    sprintf(envio->data, "Mesa %d vaciada", fsm->id_mesa);
+    sprintf(envio->data, "Mesa %d vaciada", fsm->id_mesa & 0x3F);
     envio->op = OP_MESA_VACIA;
     envio->id = fsm->id_msg + (fsm->id_mesa << 8);
     uint16_t mid = envio->id;
@@ -172,7 +172,7 @@ void send_alert_bill(fsm_t* fsm)
 
     memset(envio->data, '\0', MAXDATASIZE - ID_HEADER_LEN);
 
-    sprintf(envio->data, "Mesa %d cuenta pedida", fsm->id_mesa);
+    sprintf(envio->data, "Mesa %d cuenta pedida", fsm->id_mesa & 0x3F);
     envio->op = OP_MESA_CUENTA;
     envio->id = fsm->id_msg + (fsm->id_mesa << 8);
     uint16_t mid = envio->id;
@@ -197,7 +197,7 @@ void send_alert_waiter_call(fsm_t* fsm)
 
     memset(envio->data, '\0', MAXDATASIZE - ID_HEADER_LEN);
 
-    sprintf(envio->data, "Mesa %d llama camarero", fsm->id_mesa);
+    sprintf(envio->data, "Mesa %d llama camarero", fsm->id_mesa & 0x3F);
     envio->op = OP_MESA_LLAMA;
     envio->id = fsm->id_msg + (fsm->id_mesa << 8);
     uint16_t mid = envio->id;
@@ -363,7 +363,7 @@ PROCESS_THREAD(main_process, ev, data)
             return 1;
         } 
 
-        fsm = fsm_new(mesa_tt, num_mesa, id_msg, conn);
+        fsm = fsm_new(mesa_tt, id_clicker, id_msg, conn);
 
         PRINTF("********FSM CREADA********\n");
 

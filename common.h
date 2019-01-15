@@ -11,7 +11,7 @@
 
 #define MASK 0xC0
 #define IR_PREF 0x00
-#define MESA_PREF 0x60
+#define MESA_PREF 0x40
 #define PULSERA_PREF 0x80
 
 #define ID_HEADER_LEN (sizeof(uint16_t) * 2 + sizeof(uint8_t))

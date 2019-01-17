@@ -28,7 +28,9 @@ def build_msg(id, data, error):
     return msg_bytes
 
 def write_msg(op, id, len, data, sentido):
-    print("[{}] ({}) OP: {} ID: {} Len: {} Data: {}".format(time.strftime("%c"), sentido, hex(int(op, base=16)), id, len, data))
+    msg = "[{}] ({}) OP: {} ID: {} Len: {} Data: {}".format(time.strftime("%c"), sentido, hex(int(op, base=16)), id, len, data)
+    log_file.write("{}\n".format(msg))
+    print(msg)
 
 # No IP to connect to needed for a server
 IP = "::"
@@ -40,6 +42,8 @@ sock.bind((IP, PORT))
 
 id_ir = 1
 id_mesa = 1
+
+log_file = open("restaurante.log", "a")
 
 print("Server initialised, awaiting data. Use Ctrl + C to stop")
 while True:
@@ -73,3 +77,5 @@ while True:
         msg = build_msg(id_msg, "Operacion no identificada", True)
         time.sleep(1)
         sock.sendto(msg, address)
+
+log_file.close()

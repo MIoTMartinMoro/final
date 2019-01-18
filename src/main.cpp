@@ -78,13 +78,18 @@ void setup_wifi() {
 
 void callback(char* topic, byte* payload, unsigned int length) {
   //printMessageScreen("Message arrived");
-  char msgTopic[50];
-  sprintf(msgTopic, "%s%s", "Msg Arrived from -> ", topic);
-  Serial.println(msgTopic);
+
+  Serial.println(topic);
+
+  int index = strchr(topic, '/')-topic;
+
+  char printMsg[30];
+  memcpy(printMsg, topic+index, strlen(topic));
+
   u8g2.begin();
   u8g2.clearBuffer();					// clear the internal memory
   u8g2.setFont(u8g2_font_ncenB08_tr);	// choose a suitable font
-  u8g2.drawStr(0,10,msgTopic);	// write something to the internal memory
+  u8g2.drawStr(0,10,printMsg);	// write something to the internal memory
   u8g2.sendBuffer();					// transfer internal memory to the display
   delay(1000);
 
@@ -96,14 +101,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print((char)payload[i]);
     msgRX[i]=((char)payload[i]);
   }
-  Serial.println();
-  Serial.println(msgRX);
-  u8g2.begin();
-  u8g2.clearBuffer();					// clear the internal memory
-  u8g2.setFont(u8g2_font_ncenB08_tr);	// choose a suitable font
-  u8g2.drawStr(0,10,msgRX);	// write something to the internal memory
-  u8g2.sendBuffer();					// transfer internal memory to the display
-  delay(2000);
+  // Serial.println();
+  // Serial.println(msgRX);
+  // u8g2.begin();
+  // u8g2.clearBuffer();					// clear the internal memory
+  // u8g2.setFont(u8g2_font_ncenB08_tr);	// choose a suitable font
+  // u8g2.drawStr(0,10,msgRX);	// write something to the internal memory
+  // u8g2.sendBuffer();					// transfer internal memory to the display
+  // delay(2000);
 
   // Switch on the LED if an 1 was received as first character
   if ((char)payload[0] == '1') {
@@ -127,7 +132,7 @@ void reconnect() {
     if (client.connect(clientId.c_str())) {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      client.publish("outTopic", "hello world");
+      //client.publish("outTopic", "hello world");
       // ... and resubscribe
       client.subscribe("restaurante/#");
     } else {
@@ -165,21 +170,4 @@ void loop() {
     reconnect();
   }
   client.loop();
-
-  long now = millis();
-  if (now - lastMsg > 2000) {
-    lastMsg = now;
-    ++value;
-    snprintf (msg, 50, "hello world #%ld", value);
-    sprintf(msgSD, "%s %d", "hello world #%ld", value);
-    u8g2.begin();
-    u8g2.clearBuffer();					// clear the internal memory
-    u8g2.setFont(u8g2_font_ncenB08_tr);	// choose a suitable font
-    u8g2.drawStr(0,10,msgSD);	// write something to the internal memory
-    u8g2.sendBuffer();					// transfer internal memory to the display
-    delay(1000);
-    Serial.print("Publish message: ");
-    Serial.println(msg);
-    client.publish("outTopic", msg);
-  }
 }

@@ -128,7 +128,9 @@ void send_alert_occupated(fsm_t* fsm)
     uint16_t mid = envio->id;
     envio->len = strlen(envio->data);
 
-    mqtt_publish(&mqtt_conn, &mid, "restaurante/mesa/ocupada", (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
+    static char topic[50];
+    sprintf(topic, "restaurante/mesa/%d/ocupada", fsm->id_mesa & 0x3F);
+    mqtt_publish(&mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
     fsm->id_msg++;
 
@@ -153,7 +155,9 @@ void send_alert_empty(fsm_t* fsm)
     uint16_t mid = envio->id;
     envio->len = strlen(envio->data);
 
-    mqtt_publish(&mqtt_conn, &mid, "restaurante/mesa/vaciada", (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
+    static char topic[50];
+    sprintf(topic, "restaurante/mesa/%d/vaciada", fsm->id_mesa & 0x3F);
+    mqtt_publish(&mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
     fsm->id_msg++;
 
@@ -178,7 +182,9 @@ void send_alert_bill(fsm_t* fsm)
     uint16_t mid = envio->id;
     envio->len = strlen(envio->data);
 
-    mqtt_publish(&mqtt_conn, &mid, "restaurante/mesa/cuenta", (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
+    static char topic[50];
+    sprintf(topic, "restaurante/mesa/%d/cuenta", fsm->id_mesa & 0x3F);
+    mqtt_publish(&mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
     fsm->id_msg++; 
 
@@ -203,7 +209,9 @@ void send_alert_waiter_call(fsm_t* fsm)
     uint16_t mid = envio->id;
     envio->len = strlen(envio->data);
 
-    mqtt_publish(&mqtt_conn, &mid, "restaurante/mesa/llamada", (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
+    static char topic[50];
+    sprintf(topic, "restaurante/mesa/%d/llamada", fsm->id_mesa & 0x3F);
+    mqtt_publish(&mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
     fsm->id_msg++; 
     

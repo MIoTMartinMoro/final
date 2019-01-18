@@ -5,7 +5,7 @@
 
 #define IP6_CI40_CARLOS "fe80::19:f5ff:fe89:1e32"
 #define IP6_CI40_ALDA "fe80::19:f5ff:fe89:1d96"
-#define IP6_CI40 IP6_CI40_CARLOS
+#define IP6_CI40 IP6_CI40_ALDA
 
 #define MAXDATASIZE 256 /* maximo numero de bytes que podemos recibir */
 

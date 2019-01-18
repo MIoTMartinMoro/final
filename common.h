@@ -5,29 +5,30 @@
 
 #define IP6_CI40_CARLOS "fe80::19:f5ff:fe89:1e32"
 #define IP6_CI40_ALDA "fe80::19:f5ff:fe89:1d96"
-#define IP6_CI40 IP6_CI40_ALDA
+#define IP6_CI40 IP6_CI40_CARLOS
 
 #define MAXDATASIZE 256 /* maximo numero de bytes que podemos recibir */
 
-#define MASK 0xC0
-#define IR_PREF 0x00
-#define MESA_PREF 0x40
-#define PULSERA_PREF 0x80
+/* Máscara y prefijo de los clickers */
+#define MASK          0xC0
+#define IR_PREF       0x00
+#define MESA_PREF     0x40
+#define PULSERA_PREF  0x80
 
 #define ID_HEADER_LEN (sizeof(uint16_t) * 2 + sizeof(uint8_t))
 
 /* formato de la unidad de datos de aplicacion para Datagramas*/
 struct idappdata
 {
-        uint16_t op;                              /* codigo de operacion */
-        uint16_t id;                              /* identificador */
-        uint8_t len;                              /* longitud de datos */
-        char data[MAXDATASIZE - ID_HEADER_LEN];   /* datos */
+    uint16_t op;                              /* codigo de operacion */
+    uint16_t id;                              /* identificador */
+    uint8_t len;                              /* longitud de datos */
+    char data[MAXDATASIZE - ID_HEADER_LEN];   /* datos */
 };
 
 /* codigos de operacion (appdata.op) */
 // Clicker
-#define OP_WHOAMI_MESA	    0x0001  /* ¿Quién soy (clicker mesa)? */
+#define OP_WHOAMI_MESA      0x0001  /* ¿Quién soy (clicker mesa)? */
 #define OP_MESA_LLAMA       0x0002  /* La mesa quiere pedir */
 #define OP_MESA_CUENTA      0x0003  /* La mesa quiere la cuenta */
 #define OP_MESA_OCUPADA     0x0004  /* La mesa quiere la cuenta */

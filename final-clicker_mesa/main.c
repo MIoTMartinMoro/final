@@ -125,6 +125,7 @@ void send_alert_occupated(fsm_t* fsm)
 /*---------------------------------------------------------------------------*/
 void send_alert_empty(fsm_t* fsm)
 {
+    static char topic[50];
     static struct idappdata* envio;
     static uint16_t mid = 0;
     envio = memb_alloc(&appdata);
@@ -138,8 +139,7 @@ void send_alert_empty(fsm_t* fsm)
     envio->id = (fsm->id_mesa << 8) + fsm->id_msg;  // El primer byte se corresponde con el id de la mesa y el segundo con el nº de mensaje enviado
     mid = envio->id;
     envio->len = strlen(envio->data);
-
-    static char topic[50];
+    
     sprintf(topic, "restaurante/mesa/%d/vaciada", fsm->id_mesa & 0x3F);
     mqtt_publish(&mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
@@ -153,6 +153,7 @@ void send_alert_empty(fsm_t* fsm)
 /*---------------------------------------------------------------------------*/
 void send_alert_bill(fsm_t* fsm)
 {
+    static char topic[50];
     static struct idappdata* envio;
     static uint16_t mid = 0;
     envio = memb_alloc(&appdata);
@@ -166,8 +167,7 @@ void send_alert_bill(fsm_t* fsm)
     envio->id = (fsm->id_mesa << 8) + fsm->id_msg;  // El primer byte se corresponde con el id de la mesa y el segundo con el nº de mensaje enviado
     mid = envio->id;
     envio->len = strlen(envio->data);
-
-    static char topic[50];
+    
     sprintf(topic, "restaurante/mesa/%d/cuenta", fsm->id_mesa & 0x3F);
     mqtt_publish(&mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);

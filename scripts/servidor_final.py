@@ -4,13 +4,13 @@ Generic Python3 server that can be ran on the CI40 in order to use with the exam
 UDP client code.
 """
 import argparse
+import socket
+import time
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--port", help="Port to bind to", default=3001, type=int)
 parser.add_argument("-b", "--buffer", help="Buffer size", default=256, type=int)
 args = parser.parse_args()
-
-import socket
-import time
 
 def build_msg(id, data, error):
     msg_bytes = bytes()
@@ -32,6 +32,14 @@ def write_msg(op, id, len, data, sentido):
     log_file.write("{}\n".format(msg))
     print(msg)
 
+def asignar_mesa(id_mesa):
+    camarero_asignado = mesas_camareros[0]
+    for camarero in mesas_camareros:
+        if len(camarero) < len(camarero_asignado):  # Si un camarero tiene menos mesas se le asigna
+            camarero_asignado = camarero
+    camarero_asignado.append(id_mesa)
+    id_camarero_asignado = camarero_asignado[0]
+
 # No IP to connect to needed for a server
 IP = "::"
 PORT = args.port
@@ -42,6 +50,8 @@ sock.bind((IP, PORT))
 
 id_ir = 1
 id_mesa = 1
+id_pulsera = 1
+mesas_camareros = []  # Array de arrays con la relación mesa-camarero, el primer elemento es el id de la pulsera y el resto de sus mesas (IMPORTANTE mantener el prefijo en el id)
 
 log_file = open("restaurante.log", "a")
 
@@ -60,16 +70,25 @@ while True:
     # https://docs.python.org/3.5/library/struct.html                                                   
     # https://docs.python.org/3/howto/unicode.html#the-string-type
     msg = bytes()
-    if (op == 6):
-        id_msg = [data[2], data[3]]
-        msg = build_msg(id_msg, str(id_ir), False)
-        id_ir += 4
-        time.sleep(1)
-        sock.sendto(msg, address)
-    elif (op == 1):
+    if (op == 1):  # OP_WHOAMI_MESA
         id_msg = [data[2], data[3]]
         msg = build_msg(id_msg, str(id_mesa), False)
         id_mesa += 1
+        time.sleep(1)
+        sock.sendto(msg, address)
+    elif (op == 4):  # OP_MESA_OCUPADA
+    elif (op == 5):  # OP_MESA_VACIA
+    elif (op == 6):  # OP_WHOAMI_IR
+        id_msg = [data[2], data[3]]
+        msg = build_msg(id_msg, str(id_ir), False)
+        id_ir += 4  # Suma de 4 en 4 porque a cada clicker se le conectan 4 sensores IR
+        time.sleep(1)
+        sock.sendto(msg, address)
+    elif (op == 9):  # OP_WHOAMI_PULSERA
+        id_msg = [data[2], data[3]]
+        msg = build_msg(id_msg, str(id_pulsera), False)
+        mesas_camareros.append([id_pulsera])
+        id_pulsera += 1
         time.sleep(1)
         sock.sendto(msg, address)
     elif (op > 12):

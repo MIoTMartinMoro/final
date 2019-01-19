@@ -1,14 +1,14 @@
 #include <stdint.h>
 
-#define PUERTO_SERVIDOR 3001     /* puerto en el servidor */
-#define PUERTO_CLIENTE  3000     /* puerto en el cliente */
-#define PUERTO_MQTT     1883     /* puerto del broker MQTT */
+#define PUERTO_SERVIDOR 3001  /* puerto en el servidor */
+#define PUERTO_CLIENTE  3000  /* puerto en el cliente */
+#define PUERTO_MQTT     1883  /* puerto del broker MQTT */
 
 #define IP6_CI40_CARLOS "fe80::19:f5ff:fe89:1e32"
 #define IP6_CI40_ALDA "fe80::19:f5ff:fe89:1d96"
 #define IP6_CI40 IP6_CI40_CARLOS
 
-#define MAXDATASIZE 256 /* maximo numero de bytes que podemos recibir */
+#define MAXDATASIZE 256  /* maximo numero de bytes que podemos recibir */
 
 /* Máscara y prefijo de los dispositivos */
 #define MASK          0xC0

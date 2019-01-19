@@ -8,11 +8,11 @@
 #include "lib/memb.h"
 #include "sys/clock.h"
 
-#include "letmecreate/core/network.h"
-#include "letmecreate/core/debug.h"
-#include "letmecreate/core/common.h"
-#include "letmecreate/core/spi.h"
 #include "letmecreate/click/led_matrix.h"
+#include "letmecreate/core/common.h"
+#include "letmecreate/core/debug.h"
+#include "letmecreate/core/network.h"
+#include "letmecreate/core/spi.h"
 #include "mqtt.h"
 
 #include "common.h"
@@ -97,6 +97,7 @@ void button_callback(void)
 /*---------------------------------------------------------------------------*/
 void send_alert_occupated(fsm_t* fsm)
 {
+    static char topic[50];
     static struct idappdata* envio;
     static uint16_t mid = 0;
     envio = memb_alloc(&appdata);
@@ -110,8 +111,7 @@ void send_alert_occupated(fsm_t* fsm)
     envio->id = (fsm->id_mesa << 8) + fsm->id_msg;  // El primer byte se corresponde con el id de la mesa y el segundo con el nº de mensaje enviado
     mid = envio->id;
     envio->len = strlen(envio->data);
-
-    static char topic[50];
+    
     sprintf(topic, "restaurante/mesa/%d/ocupada", fsm->id_mesa & 0x3F);
     mqtt_publish(&mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
@@ -181,6 +181,7 @@ void send_alert_bill(fsm_t* fsm)
 /*---------------------------------------------------------------------------*/
 void send_alert_waiter_call(fsm_t* fsm)
 {
+    static char topic[50];
     static struct idappdata* envio;
     static uint16_t mid = 0;
     envio = memb_alloc(&appdata);
@@ -195,7 +196,6 @@ void send_alert_waiter_call(fsm_t* fsm)
     mid = envio->id;
     envio->len = strlen(envio->data);
 
-    static char topic[50];
     sprintf(topic, "restaurante/mesa/%d/llamada", fsm->id_mesa & 0x3F);
     mqtt_publish(&mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
@@ -383,6 +383,7 @@ PROCESS_THREAD(main_process, ev, data)
 
             PROCESS_WAIT_EVENT();
         }
+        
         led_matrix_click_disable();
         spi_release();
         memb_free(&appdata, operacion);

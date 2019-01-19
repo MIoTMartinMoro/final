@@ -55,7 +55,9 @@ def asignar_mesa(id_mesa):
 
 def mesa_vaciada(id_mesa):
     for camarero in mesas_camareros:
-        camarero.remove(id_mesa)
+        if id_mesa in camarero:
+            camarero.remove(id_mesa)
+            break
 
 # No IP to connect to needed for a server
 IP = "::"

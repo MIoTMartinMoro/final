@@ -2,6 +2,7 @@
 
 #define PUERTO_SERVIDOR 3001     /* puerto en el servidor */
 #define PUERTO_CLIENTE  3000     /* puerto en el cliente */
+#define PUERTO_MQTT     1883     /* puerto del broker MQTT */
 
 #define IP6_CI40_CARLOS "fe80::19:f5ff:fe89:1e32"
 #define IP6_CI40_ALDA "fe80::19:f5ff:fe89:1d96"
@@ -9,11 +10,12 @@
 
 #define MAXDATASIZE 256 /* maximo numero de bytes que podemos recibir */
 
-/* Máscara y prefijo de los clickers */
+/* Máscara y prefijo de los dispositivos */
 #define MASK          0xC0
 #define IR_PREF       0x00
 #define MESA_PREF     0x40
 #define PULSERA_PREF  0x80
+#define CI40_PREF     0xC0
 
 #define ID_HEADER_LEN (sizeof(uint16_t) * 2 + sizeof(uint8_t))
 
@@ -43,6 +45,7 @@ struct idappdata
 #define OP_CUENTA_PEDIDA    0x000B  /* Un camarero recibe un aviso de cuenta */
 // Servidor
 #define OP_AWAKE            0x000C  /* El servidor pregunta a los dispositivos si están despiertos */
+#define OP_ASIGNAR_MESA     0x000D  /* El servidor le asigna una mesa a un camarero */
 // Otros
 #define OP_OK               0xEEEE  /* OK */
 #define OP_ERROR            0xFFFF  /* ERROR */

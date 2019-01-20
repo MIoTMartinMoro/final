@@ -25,14 +25,22 @@ char msgSD[50];
 unsigned int localPort = 8888;
 WiFiUDP Udp;
 
+uint8_t num_pulsera = 0;
+uint8_t id_pulsera = 0;
+char numPusRX[5];
+char numMesaRX[5];
+char *misMesas[50];
+int numMisMesas=0;
+
+struct idappdata DATOS;
+
 
 void setup_wifi() {
 
   struct idappdata OPERACION;
   struct idappdata* RESULTADO;
-  uint8_t id_pulsera = 0;
   uint8_t id_msg = 0;
-  uint8_t num_pulsera = 0;
+
   char buffer[MAXDATASIZE + 1];
 
   delay(10);
@@ -100,48 +108,86 @@ void setup_wifi() {
     RESULTADO =(struct idappdata*) &buffer;
     num_pulsera= (uint8_t) strtol(RESULTADO->data, NULL, 10);
     id_pulsera = (uint8_t) (PULSERA_PREF + num_pulsera);
+    DATOS.id=id_pulsera;
+    DATOS.op=num_pulsera;
     Serial.print("Num pulsera: ");
-    Serial.println(num_pulsera);
+    Serial.println(DATOS.op);
     Serial.print("ID pulsera: ");
-    Serial.println(id_pulsera);
+    Serial.println(DATOS.id);
     Serial.println("**************************************************");
   }
 }
 
 
 void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.println(topic);
-
-  int index = strchr(topic, '/')-topic;
-
-  char printMsg[30];
-  memcpy(printMsg, topic+index, strlen(topic));
-
-  u8g2.begin();
-  u8g2.clearBuffer();					// clear the internal memory
-  u8g2.setFont(u8g2_font_ncenB08_tr);	// choose a suitable font
-  u8g2.drawStr(0,10,printMsg);	// write something to the internal memory
-  u8g2.sendBuffer();					// transfer internal memory to the display
-  delay(1000);
-
   char msgRX[50];
-  Serial.print("Message arrived [");
+  Serial.print("Message arrived from topic [");
   Serial.print(topic);
   Serial.print("] ");
   for (int i = 0; i < length; i++) {
     Serial.print((char)payload[i]);
     msgRX[i]=((char)payload[i]);
   }
+  Serial.println(msgRX);
 
-  // Switch on the LED if an 1 was received as first character
-  if ((char)payload[0] == '1') {
-    digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
-    // but actually the LED is on; this is because
-    // it is active low on the ESP-01)
-  } else {
-    digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
+  int asigIndex = (int)(strstr(topic, "asignada")-topic);
+  int mesaRXindex = (int)(strstr(topic, "mesa")-topic);
+  int vaciada = (int)(strstr(topic, "vaciada")-topic);
+
+  if(mesaRXindex>0){
+    memcpy(numMesaRX, topic+mesaRXindex+strlen("mesa")+1, 2);
+    Serial.print("Numero mesa recibido: ");
+    Serial.println(numMesaRX);
   }
 
+  if(asigIndex>0){
+    memcpy(numPusRX, topic+asigIndex+strlen("asignada")+1, strlen(topic));
+    Serial.print("Numero pulsera recibido: ");
+    Serial.println(numPusRX);
+    char num_pulseraChar[5]={'0','0','0','0','0'};
+    itoa(DATOS.op, num_pulseraChar, 10);
+    Serial.println(DATOS.op);
+    //sprintf(num_pulseraChar, "%03d", num_pulsera);
+    Serial.print("Mi pulsera: ");
+    Serial.println(num_pulseraChar);
+    Serial.print("Pulsera recibida en topic: ");
+    Serial.println(numPusRX);
+    if(strcmp(numPusRX,num_pulseraChar)==0){//añade el número de la mesa a las de la pulsera
+      misMesas[numMisMesas]=numMesaRX;
+      Serial.print("Mesa añadida a esta pulsera: ");
+      Serial.println(misMesas[numMisMesas]);
+      numMisMesas++;
+    }
+  } else if(vaciada>0){
+    Serial.print("Numero mesa vaciada: ");
+    Serial.println(numMesaRX);
+    for(int i=0; i<numMisMesas; i++){
+      if(strcmp(misMesas[i],numMesaRX)==0){
+        misMesas[i]="0";                  //limpiar el array!!!!!!!!!!!!!!!
+      }
+    }
+  } else{
+
+    for(int i=0; i<numMisMesas; i++){
+      Serial.print("misMesas[] : ");
+      Serial.println(misMesas[i]);
+      Serial.print("numMesaRX : ");
+      Serial.println(numMesaRX);
+      if(strcmp(misMesas[i],numMesaRX)==0){
+        int index = strchr(topic, '/')-topic;
+        char printMsg[30];
+        memcpy(printMsg, topic+index, strlen(topic));
+
+        u8g2.begin();
+        u8g2.clearBuffer();					// clear the internal memory
+        u8g2.setFont(u8g2_font_ncenB08_tr);	// choose a suitable font
+        u8g2.drawStr(0,10,printMsg);	// write something to the internal memory
+        u8g2.sendBuffer();					// transfer internal memory to the display
+        delay(1000);
+      }
+    }
+}
+  Serial.println("---------------------------------------------");
 }
 
 void reconnect() {

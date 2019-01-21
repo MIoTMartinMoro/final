@@ -98,8 +98,9 @@ while True:
     elif (op == 4):  # OP_MESA_OCUPADA
         id_camarero_asignado = asignar_mesa(data[3])
         id_msg = [id_msg_ci40, ID_CI40]
-        msg = build_msg(id_msg, str(data[3]), False, "000d")
-        topic = "restaurante/mesa/{}/asignada/{}".format(data[3], id_camarero_asignado)
+        data_msg = "Mesa {} asignada a camarero {}".format(data[3] & 0x3f, id_camarero_asignado & 0x3f)
+        msg = build_msg(id_msg, data_msg, False, "000d")
+        topic = "restaurante/mesa/{}/asignada/{}".format(data[3] & 0x3f, id_camarero_asignado & 0x3f)
         id_msg = ID_CI40 * 256 + id_msg_ci40
         msg_array = list(map(lambda byte: str(byte), msg))
         msg_str = " ".join(msg_array) 

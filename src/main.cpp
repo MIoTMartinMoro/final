@@ -27,7 +27,7 @@ WiFiUDP Udp;
 
 uint8_t num_pulsera = 0;
 uint8_t id_pulsera = 0;
-char numPusRX[5];
+char IDpulseraRX[5];
 char numMesaRX[5];
 char *misMesas[50];
 int numMisMesas=0;
@@ -113,8 +113,16 @@ void setup_wifi() {
     Serial.print("Num pulsera: ");
     Serial.println(DATOS.op);
     Serial.print("ID pulsera: ");
-    Serial.println(DATOS.id);
+    Serial.println(DATOS.op
+    );
     Serial.println("**************************************************");
+
+    u8g2.begin();
+    u8g2.clearBuffer();					// clear the internal memory
+    u8g2.setFont(u8g2_font_ncenB12_tr);	// choose a suitable font
+    u8g2.drawStr(0,23,"Esperando...");	// write something to the internal memory
+    u8g2.sendBuffer();					// transfer internal memory to the display
+    delay(1000);
   }
 }
 
@@ -135,53 +143,91 @@ void callback(char* topic, byte* payload, unsigned int length) {
   int vaciada = (int)(strstr(topic, "vaciada")-topic);
 
   if(mesaRXindex>0){
-    memcpy(numMesaRX, topic+mesaRXindex+strlen("mesa")+1, 2);
+    // int indexfinal=(int)(strstr(topic, "//")-topic); //en el primero no existe
+    // int numb=indexfinal-(int)(topic+mesaRXindex+strlen("mesa")+1);
+    // Serial.println(numb);
+    // Serial.println(indexfinal);
+    // Serial.println(topic+mesaRXindex+strlen("mesa")+1);
+    memcpy(numMesaRX, topic+mesaRXindex+strlen("mesa")+1, 1);
     Serial.print("Numero mesa recibido: ");
     Serial.println(numMesaRX);
   }
 
   if(asigIndex>0){
-    memcpy(numPusRX, topic+asigIndex+strlen("asignada")+1, strlen(topic));
+    memcpy(IDpulseraRX, topic+asigIndex+strlen("asignada")+1, strlen(topic));
     Serial.print("Numero pulsera recibido: ");
-    Serial.println(numPusRX);
-    char num_pulseraChar[5]={'0','0','0','0','0'};
-    itoa(DATOS.op, num_pulseraChar, 10);
-    Serial.println(DATOS.op);
-    //sprintf(num_pulseraChar, "%03d", num_pulsera);
+    Serial.println(IDpulseraRX);
+    char id_pulseraChar[5]={'0','0','0','0','0'};
+    itoa(DATOS.op
+      , id_pulseraChar, 10);
+    //sprintf(id_pulseraChar, "%03d", num_pulsera);
     Serial.print("Mi pulsera: ");
-    Serial.println(num_pulseraChar);
+    Serial.println(id_pulseraChar);
     Serial.print("Pulsera recibida en topic: ");
-    Serial.println(numPusRX);
-    if(strcmp(numPusRX,num_pulseraChar)==0){//añade el número de la mesa a las de la pulsera
-      misMesas[numMisMesas]=numMesaRX;
-      Serial.print("Mesa añadida a esta pulsera: ");
-      Serial.println(misMesas[numMisMesas]);
-      numMisMesas++;
+    Serial.println(IDpulseraRX);
+    if(numMisMesas>0){
+      for(int i=0; i<numMisMesas; i++){
+        Serial.println("entra en for");
+        if(strcmp(misMesas[i],numMesaRX)!=0){
+          Serial.println("entra en primer if");
+          if(strcmp(IDpulseraRX,id_pulseraChar)==0){//añade el número de la mesa a las de la pulsera
+            Serial.println("entra en segundo if");
+            misMesas[numMisMesas]=numMesaRX;
+            Serial.print("Mesa añadida a esta pulsera: ");
+            Serial.println(misMesas[numMisMesas]);
+            numMisMesas++;
+          }
+        }
+      }
+    } else {
+      if(strcmp(IDpulseraRX,id_pulseraChar)==0){//añade el número de la mesa a las de la pulsera
+        misMesas[numMisMesas]=numMesaRX;
+        Serial.print("Mesa añadida a esta pulsera: ");
+        Serial.println(misMesas[numMisMesas]);
+        numMisMesas++;
+      }
     }
   } else if(vaciada>0){
     Serial.print("Numero mesa vaciada: ");
     Serial.println(numMesaRX);
+    boolean encontrado=false;
     for(int i=0; i<numMisMesas; i++){
-      if(strcmp(misMesas[i],numMesaRX)==0){
-        misMesas[i]="0";                  //limpiar el array!!!!!!!!!!!!!!!
+      while(!encontrado){
+        if(strcmp(misMesas[i],numMesaRX)==0){
+          encontrado=true;
+          misMesas[i]="0";                  //limpiar el array!!!!!!!!!!!!!!!
       }
+      misMesas[i]=misMesas[i+1];
+      if(i+1==numMisMesas) break;
+    }
+    numMisMesas--;
+    char printMsg[30];
+    memcpy(printMsg, topic+mesaRXindex+strlen("mesa"), strlen(topic));
+    //memcpy(printMsg, topic+index, strlen(topic));
+    Serial.println(printMsg);
+
+    u8g2.begin();
+    u8g2.clearBuffer();					// clear the internal memory
+    u8g2.setFont(u8g2_font_ncenB12_tr);	// choose a suitable font
+    u8g2.drawStr(0,23,printMsg);	// write something to the internal memory
+    u8g2.sendBuffer();					// transfer internal memory to the display
+    delay(1000);
     }
   } else{
-
     for(int i=0; i<numMisMesas; i++){
       Serial.print("misMesas[] : ");
       Serial.println(misMesas[i]);
-      Serial.print("numMesaRX : ");
-      Serial.println(numMesaRX);
       if(strcmp(misMesas[i],numMesaRX)==0){
-        int index = strchr(topic, '/')-topic;
+        //int index = strchr(topic, '/')-topic;
         char printMsg[30];
-        memcpy(printMsg, topic+index, strlen(topic));
+        memcpy(printMsg, topic+mesaRXindex+strlen("mesa"), strlen(topic));
+        //memcpy(printMsg, topic+index, strlen(topic));
+        Serial.println(printMsg);
 
         u8g2.begin();
         u8g2.clearBuffer();					// clear the internal memory
-        u8g2.setFont(u8g2_font_ncenB08_tr);	// choose a suitable font
-        u8g2.drawStr(0,10,printMsg);	// write something to the internal memory
+        u8g2.setFont(u8g2_font_ncenB12_tr);	// choose a suitable font
+        u8g2.drawStr(0,23,printMsg);	// write something to the internal memory
         u8g2.sendBuffer();					// transfer internal memory to the display
         delay(1000);
       }
@@ -220,8 +266,8 @@ void setup() {
   u8g2.begin();
   Serial.println("Starting Setup");
   u8g2.clearBuffer();					// clear the internal memory
-  u8g2.setFont(u8g2_font_ncenB08_tr);	// choose a suitable font
-  u8g2.drawStr(0,10,"Starting Setup");	// write something to the internal memory
+  u8g2.setFont(u8g2_font_ncenB12_tr);	// choose a suitable font
+  u8g2.drawStr(0,23,"Starting Setup");	// write something to the internal memory
   u8g2.sendBuffer();					// transfer internal memory to the display
   delay(1000);
 

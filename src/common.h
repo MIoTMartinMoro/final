@@ -9,39 +9,43 @@
 
 #define MAXDATASIZE 256 /* maximo numero de bytes que podemos recibir */
 
-#define MASK 0xC0
-#define IR_PREF 0x00
-#define MESA_PREF 0x40
-#define PULSERA_PREF 0x80
+/* Máscara y prefijo de los dispositivos */
+#define MASK          0xC0
+#define IR_PREF       0x00
+#define MESA_PREF     0x40
+#define PULSERA_PREF  0x80
+#define CI40_PREF     0xC0
 
 #define ID_HEADER_LEN (sizeof(uint16_t) * 2 + sizeof(uint8_t))
 
 /* formato de la unidad de datos de aplicacion para Datagramas*/
 struct idappdata
 {
-        uint16_t op;                              /* codigo de operacion */
-        uint16_t id;                              /* identificador */
-        uint8_t len;                              /* longitud de datos */
-        char data[MAXDATASIZE - ID_HEADER_LEN];   /* datos */
+    uint16_t op;                              /* codigo de operacion */
+    uint16_t id;                              /* identificador */
+    uint8_t len;                              /* longitud de datos */
+    char data[MAXDATASIZE - ID_HEADER_LEN];   /* datos */
 };
 
 /* codigos de operacion (appdata.op) */
 // Clicker
-#define OP_WHOAMI_MESA	    0x0001  /* ¿Quién soy (clicker mesa)? */
+#define OP_WHOAMI_MESA      0x0001  /* ¿Quién soy (clicker mesa)? */
 #define OP_MESA_LLAMA       0x0002  /* La mesa quiere pedir */
 #define OP_MESA_CUENTA      0x0003  /* La mesa quiere la cuenta */
-#define OP_MESA_OCUPADA     0x0004  /* La mesa quiere la cuenta */
-#define OP_MESA_VACIA       0x0005  /* La mesa quiere la cuenta */
+#define OP_MESA_OCUPADA     0x0004  /* La mesa se ocupa */
+#define OP_MESA_VACIA       0x0005  /* La mesa se vacía */
+#define OP_MESA_ATENDIDA    0x0006  /* La mesa ya ha sido atendida */
 // IR
-#define OP_WHOAMI_IR        0x0006  /* ¿Quién soy (IR)? */
-#define OP_PLATO_DETECTADO  0x0007  /* Un plato está preparado */
-#define OP_PLATO_RETIRADO   0x0008  /* Un plato está retirado */
+#define OP_WHOAMI_IR        0x0007  /* ¿Quién soy (IR)? */
+#define OP_PLATO_DETECTADO  0x0008  /* Un plato está preparado */
+#define OP_PLATO_RETIRADO   0x0009  /* Un plato está retirado */
 // Pulsera
-#define OP_WHOAMI_PULSERA   0x0009  /* ¿Quién soy (pulsera)? */
-#define OP_PULSERA_LLAMADA  0x000A  /* Un camarero recibe un aviso de una mesas */
-#define OP_CUENTA_PEDIDA    0x000B  /* Un camarero recibe un aviso de cuenta */
+#define OP_WHOAMI_PULSERA   0x000A  /* ¿Quién soy (pulsera)? */
+#define OP_PULSERA_LLAMADA  0x000B  /* Un camarero recibe un aviso de una mesas */
+#define OP_CUENTA_PEDIDA    0x000C  /* Un camarero recibe un aviso de cuenta */
 // Servidor
-#define OP_AWAKE            0x000C  /* El servidor pregunta a los dispositivos si están despiertos */
+#define OP_AWAKE            0x000D  /* El servidor pregunta a los dispositivos si están despiertos */
+#define OP_ASIGNAR_MESA     0x000E  /* El servidor le asigna una mesa a un camarero */
 // Otros
 #define OP_OK               0xEEEE  /* OK */
 #define OP_ERROR            0xFFFF  /* ERROR */

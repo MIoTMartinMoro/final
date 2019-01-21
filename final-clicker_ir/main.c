@@ -225,7 +225,7 @@ PROCESS_THREAD(main_process, ev, data)
             PROCESS_EXIT();
         }
 
-        if (mqtt_connect(&mqtt_conn, IP6_CI40, 1883, 99) < 0) {
+        if (mqtt_connect(&mqtt_conn, IP6_CI40, PUERTO_MQTT, 99) < 0) {
             PRINTF("MQTT connect failed\n");
             PROCESS_EXIT();
         }        

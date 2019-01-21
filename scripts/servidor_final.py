@@ -107,20 +107,20 @@ while True:
         id_msg_ci40 += 1
     elif (op == 5):  # OP_MESA_VACIA
         mesa_vaciada(data[3])
-    elif (op == 6):  # OP_WHOAMI_IR
+    elif (op == 7):  # OP_WHOAMI_IR
         id_msg = [data[2], data[3]]
         msg = build_msg(id_msg, str(id_ir), False)
         id_ir += 4  # Suma de 4 en 4 porque a cada clicker se le conectan 4 sensores IR
         time.sleep(1)
         sock.sendto(msg, address)
-    elif (op == 9):  # OP_WHOAMI_PULSERA
+    elif (op == 10):  # OP_WHOAMI_PULSERA
         id_msg = [data[2], data[3]]
         msg = build_msg(id_msg, str(id_pulsera), False)
-        mesas_camareros.append([id_pulsera])
+        mesas_camareros.append([id_pulsera + 0x80])
         id_pulsera += 1
         time.sleep(1)
         sock.sendto(msg, address)
-    elif (op > 13):
+    elif (op > 14):
         id_msg = [data[2], data[3]]
         msg = build_msg(id_msg, "Operacion no identificada", True)
         time.sleep(1)

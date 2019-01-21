@@ -123,6 +123,34 @@ void send_alert_occupated(fsm_t* fsm)
     leds_off(LED1);
 }
 /*---------------------------------------------------------------------------*/
+void send_alert_attended(fsm_t* fsm)
+{
+    static char topic[50];
+    static struct idappdata* envio;
+    static uint16_t mid = 0;
+    envio = memb_alloc(&appdata);
+
+    leds_on(LED1);
+
+    memset(envio->data, '\0', MAXDATASIZE - ID_HEADER_LEN);
+
+    sprintf(envio->data, "Mesa %d atendida", fsm->id_mesa & 0x3F);
+    envio->op = OP_MESA_ATENDIDA;
+    envio->id = (fsm->id_mesa << 8) + fsm->id_msg;  // El primer byte se corresponde con el id de la mesa y el segundo con el nº de mensaje enviado
+    mid = envio->id;
+    envio->len = strlen(envio->data);
+    
+    sprintf(topic, "restaurante/mesa/%d/atendida", fsm->id_mesa & 0x3F);
+    mqtt_publish(&mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
+    udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
+    fsm->id_msg++;
+
+    led_matrix_click_display_number(fsm->id_mesa & 0x3F);
+    
+    memb_free(&appdata, envio);
+    leds_off(LED1);
+}
+/*---------------------------------------------------------------------------*/
 void send_alert_empty(fsm_t* fsm)
 {
     static char topic[50];
@@ -262,7 +290,7 @@ PROCESS_THREAD(main_process, ev, data)
             {EMPTY,          check_button1,  OCCUPATED,      send_alert_occupated},
             {OCCUPATED,      check_button1,  WAITER_CALLED,  send_alert_waiter_call},
             {OCCUPATED,      check_button2,  BILL_ASKED,     send_alert_bill},
-            {WAITER_CALLED,  check_button1,  OCCUPATED,      send_alert_occupated},
+            {WAITER_CALLED,  check_button1,  OCCUPATED,      send_alert_attended},
             {WAITER_CALLED,  check_button2,  BILL_ASKED,     send_alert_bill},
             {BILL_ASKED,     check_button2,  EMPTY,          send_alert_empty},
             {-1, NULL, -1, NULL},
@@ -359,7 +387,7 @@ PROCESS_THREAD(main_process, ev, data)
             PROCESS_EXIT();
         }
 
-        if (mqtt_connect(&mqtt_conn, IP6_CI40, 1883, 99) < 0) {
+        if (mqtt_connect(&mqtt_conn, IP6_CI40, PUERTO_MQTT, 99) < 0) {
             PRINTF("MQTT connect failed\n");
             PROCESS_EXIT();
         }

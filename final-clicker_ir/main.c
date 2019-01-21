@@ -21,8 +21,6 @@
 #define UMBRAL 2
 #define N_PLATOS 4
 
-static struct mqtt_connection mqtt_conn;
-
 MEMB(appdata, struct idappdata, MAXDATASIZE);
 
 /*---------------------------------------------------------------------------*/
@@ -64,7 +62,7 @@ void send_alert(fsm_t* fsm)
                 mid = envio->id;
                 envio->len = strlen(envio->data);
 
-                mqtt_publish(&mqtt_conn, &mid, "restaurante/plato/detectado", (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
+                mqtt_publish(fsm->mqtt_conn, &mid, "restaurante/plato/detectado", (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
                 udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
                 fsm->id_msg++;
             } else {  // Si el estado es diferente y el nuevo es apagado entra aquí
@@ -74,7 +72,7 @@ void send_alert(fsm_t* fsm)
                 mid = envio->id;
                 envio->len = strlen(envio->data);
 
-                mqtt_publish(&mqtt_conn, &mid, "restaurante/plato/retirado", (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
+                mqtt_publish(fsm->mqtt_conn, &mid, "restaurante/plato/retirado", (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
                 udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
                 fsm->id_msg++;
             }
@@ -135,6 +133,7 @@ PROCESS_THREAD(main_process, ev, data)
         static struct etimer et;
         static struct idappdata* operacion;
         static struct idappdata* resultado;
+        static struct mqtt_connection mqtt_conn;
         static struct uip_ip_hdr metadata;
         static struct uip_udp_conn* conn;
         static uint8_t flashes = 0;
@@ -231,7 +230,7 @@ PROCESS_THREAD(main_process, ev, data)
         }        
 
         // CREACIÓN DE LA MÁQUINA DE ESTADOS
-        fsm = fsm_new(sensor_ir, id_msg, id_clicker, conn);
+        fsm = fsm_new(sensor_ir, id_clicker, id_msg, conn, &mqtt_conn);
 
         PRINTF("********FSM CREADA********\n");
 

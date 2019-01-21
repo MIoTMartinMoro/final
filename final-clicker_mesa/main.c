@@ -27,7 +27,6 @@
 #define FLAG_BUTTON_1 1
 #define FLAG_BUTTON_2 2
 
-static struct mqtt_connection mqtt_conn;
 static uint8_t buttons_flags_status = 0; //0 apagado, 1 pulsado [0] -> boton1, [1]->boton2
 static uint8_t dibujos[7][N_COL_LEDS] = { 
     { 0x00, 0x00, 0x00, 0x18, 0x18, 0x00, 0x00, 0x00 },  // Config 1
@@ -106,18 +105,18 @@ void send_alert_occupated(fsm_t* fsm)
 
     memset(envio->data, '\0', MAXDATASIZE - ID_HEADER_LEN);
 
-    sprintf(envio->data, "Mesa %d ocupada", fsm->id_mesa & 0x3F);
+    sprintf(envio->data, "Mesa %d ocupada", fsm->id_clicker & 0x3F);
     envio->op = OP_MESA_OCUPADA;
-    envio->id = (fsm->id_mesa << 8) + fsm->id_msg;  // El primer byte se corresponde con el id de la mesa y el segundo con el nº de mensaje enviado
+    envio->id = (fsm->id_clicker << 8) + fsm->id_msg;  // El primer byte se corresponde con el id de la mesa y el segundo con el nº de mensaje enviado
     mid = envio->id;
     envio->len = strlen(envio->data);
     
-    sprintf(topic, "restaurante/mesa/%d/ocupada", fsm->id_mesa & 0x3F);
-    mqtt_publish(&mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
+    sprintf(topic, "restaurante/mesa/%d/ocupada", fsm->id_clicker & 0x3F);
+    mqtt_publish(fsm->mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
     fsm->id_msg++;
 
-    led_matrix_click_display_number(fsm->id_mesa & 0x3F);
+    led_matrix_click_display_number(fsm->id_clicker & 0x3F);
     
     memb_free(&appdata, envio);
     leds_off(LED1);
@@ -134,18 +133,18 @@ void send_alert_attended(fsm_t* fsm)
 
     memset(envio->data, '\0', MAXDATASIZE - ID_HEADER_LEN);
 
-    sprintf(envio->data, "Mesa %d atendida", fsm->id_mesa & 0x3F);
+    sprintf(envio->data, "Mesa %d atendida", fsm->id_clicker & 0x3F);
     envio->op = OP_MESA_ATENDIDA;
-    envio->id = (fsm->id_mesa << 8) + fsm->id_msg;  // El primer byte se corresponde con el id de la mesa y el segundo con el nº de mensaje enviado
+    envio->id = (fsm->id_clicker << 8) + fsm->id_msg;  // El primer byte se corresponde con el id de la mesa y el segundo con el nº de mensaje enviado
     mid = envio->id;
     envio->len = strlen(envio->data);
     
-    sprintf(topic, "restaurante/mesa/%d/atendida", fsm->id_mesa & 0x3F);
-    mqtt_publish(&mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
+    sprintf(topic, "restaurante/mesa/%d/atendida", fsm->id_clicker & 0x3F);
+    mqtt_publish(fsm->mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
     fsm->id_msg++;
 
-    led_matrix_click_display_number(fsm->id_mesa & 0x3F);
+    led_matrix_click_display_number(fsm->id_clicker & 0x3F);
     
     memb_free(&appdata, envio);
     leds_off(LED1);
@@ -162,14 +161,14 @@ void send_alert_empty(fsm_t* fsm)
 
     memset(envio->data, '\0', MAXDATASIZE - ID_HEADER_LEN);
 
-    sprintf(envio->data, "Mesa %d vaciada", fsm->id_mesa & 0x3F);
+    sprintf(envio->data, "Mesa %d vaciada", fsm->id_clicker & 0x3F);
     envio->op = OP_MESA_VACIA;
-    envio->id = (fsm->id_mesa << 8) + fsm->id_msg;  // El primer byte se corresponde con el id de la mesa y el segundo con el nº de mensaje enviado
+    envio->id = (fsm->id_clicker << 8) + fsm->id_msg;  // El primer byte se corresponde con el id de la mesa y el segundo con el nº de mensaje enviado
     mid = envio->id;
     envio->len = strlen(envio->data);
     
-    sprintf(topic, "restaurante/mesa/%d/vaciada", fsm->id_mesa & 0x3F);
-    mqtt_publish(&mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
+    sprintf(topic, "restaurante/mesa/%d/vaciada", fsm->id_clicker & 0x3F);
+    mqtt_publish(fsm->mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
     fsm->id_msg++;
 
@@ -190,14 +189,14 @@ void send_alert_bill(fsm_t* fsm)
 
     memset(envio->data, '\0', MAXDATASIZE - ID_HEADER_LEN);
 
-    sprintf(envio->data, "Mesa %d cuenta pedida", fsm->id_mesa & 0x3F);
+    sprintf(envio->data, "Mesa %d cuenta pedida", fsm->id_clicker & 0x3F);
     envio->op = OP_MESA_CUENTA;
-    envio->id = (fsm->id_mesa << 8) + fsm->id_msg;  // El primer byte se corresponde con el id de la mesa y el segundo con el nº de mensaje enviado
+    envio->id = (fsm->id_clicker << 8) + fsm->id_msg;  // El primer byte se corresponde con el id de la mesa y el segundo con el nº de mensaje enviado
     mid = envio->id;
     envio->len = strlen(envio->data);
     
-    sprintf(topic, "restaurante/mesa/%d/cuenta", fsm->id_mesa & 0x3F);
-    mqtt_publish(&mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
+    sprintf(topic, "restaurante/mesa/%d/cuenta", fsm->id_clicker & 0x3F);
+    mqtt_publish(fsm->mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
     fsm->id_msg++; 
 
@@ -218,14 +217,14 @@ void send_alert_waiter_call(fsm_t* fsm)
 
     memset(envio->data, '\0', MAXDATASIZE - ID_HEADER_LEN);
 
-    sprintf(envio->data, "Mesa %d llama camarero", fsm->id_mesa & 0x3F);
+    sprintf(envio->data, "Mesa %d llama camarero", fsm->id_clicker & 0x3F);
     envio->op = OP_MESA_LLAMA;
-    envio->id = (fsm->id_mesa << 8) + fsm->id_msg;  // El primer byte se corresponde con el id de la mesa y el segundo con el nº de mensaje enviado
+    envio->id = (fsm->id_clicker << 8) + fsm->id_msg;  // El primer byte se corresponde con el id de la mesa y el segundo con el nº de mensaje enviado
     mid = envio->id;
     envio->len = strlen(envio->data);
 
-    sprintf(topic, "restaurante/mesa/%d/llamada", fsm->id_mesa & 0x3F);
-    mqtt_publish(&mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
+    sprintf(topic, "restaurante/mesa/%d/llamada", fsm->id_clicker & 0x3F);
+    mqtt_publish(fsm->mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
     udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
     fsm->id_msg++; 
     
@@ -258,7 +257,7 @@ int check_button2(fsm_t* fsm) {
 }
 /*---------------------------------------------------------------------------*/
 /* Función necesaria para usar MQTT */
-void mqtt_event(struct mqtt_connection *m, mqtt_event_t event, void *data)
+void mqtt_event(struct mqtt_connection* m, mqtt_event_t event, void* data)
 {
     
 }
@@ -276,6 +275,7 @@ PROCESS_THREAD(main_process, ev, data)
         static struct etimer et;
         static struct idappdata* operacion;
         static struct idappdata* resultado;
+        static struct mqtt_connection mqtt_conn;
         static struct uip_ip_hdr metadata;
         static struct uip_udp_conn* conn;
         static uint8_t flashes = 0;
@@ -393,7 +393,7 @@ PROCESS_THREAD(main_process, ev, data)
         }
 
         // CREACIÓN DE LA MÁQUINA DE ESTADOS
-        fsm = fsm_new(mesa_tt, id_clicker, id_msg, conn);
+        fsm = fsm_new(mesa_tt, id_clicker, id_msg, conn, &mqtt_conn);
 
         PRINTF("********FSM CREADA********\n");
 

@@ -8,7 +8,7 @@ VERSION? = $(shell git describe --abbrev=4 --dirty --always --tags)
 
 APPS += letmecreateiot mqtt
 
-CONTIKI_SOURCEFILES += fsm.c
+CONTIKI_SOURCEFILES += ../fsm.c
 
 CFLAGS += -DDEBUG_IP=fe80:0000:0000:0000:0019:f5ff:fe89:1e32
 CFLAGS += -DVERSION=$(VERSION)

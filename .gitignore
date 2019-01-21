@@ -5,3 +5,5 @@ obj_mikro-e
 *.mikro-e
 symbols.*
 *.a
+*.d
+*.o

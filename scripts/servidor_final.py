@@ -86,7 +86,7 @@ while True:
     len_data = data[4]
     data_msg = data[5:]
 
-    write_msg(str(op), str(id_msg), str(len_data), data_msg, "Recibido")
+    write_msg(hex(op), str(id_msg), str(len_data), data_msg, "Recibido")
 
     msg = bytes()
     if (op == 1):  # OP_WHOAMI_MESA

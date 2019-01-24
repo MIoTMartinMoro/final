@@ -6,7 +6,7 @@
 
 #define IP6_CI40_CARLOS "fe80::19:f5ff:fe89:1e32"
 #define IP6_CI40_ALDA "fe80::19:f5ff:fe89:1d96"
-#define IP6_CI40 IP6_CI40_CARLOS
+#define IP6_CI40 IP6_CI40_ALDA
 
 #define MAXDATASIZE 256  /* maximo numero de bytes que podemos recibir */
 
@@ -50,10 +50,3 @@ struct idappdata
 // Otros
 #define OP_OK               0xEEEE  /* OK */
 #define OP_ERROR            0xFFFF  /* ERROR */
-
-
-#define BUTTON_CHECK_IRQ(port, pin) __BUTTON_CHECK_IRQ(port, pin)
-/* Check if button1 was pressed */
-#define BUTTON1_CHECK_IRQ() BUTTON_CHECK_IRQ(BUTTON1_PORT, BUTTON1_PIN)
-#define BUTTON2_CHECK_IRQ() BUTTON_CHECK_IRQ(BUTTON2_PORT, BUTTON1_PIN)  
-/* Method to be called when button1 is pressed */

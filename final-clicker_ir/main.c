@@ -42,6 +42,7 @@ uint8_t convert_values(float* values, int n)
 //Funciones de salida. Hacen una acción. Devuelven void
 void send_alert(fsm_t* fsm)
 {
+    static char topic[50];
     static uint8_t i = 0;
     static uint8_t id_ir = 0;
     static uint16_t mid = 0;
@@ -62,7 +63,8 @@ void send_alert(fsm_t* fsm)
                 mid = envio->id;
                 envio->len = strlen(envio->data);
 
-                mqtt_publish(fsm->mqtt_conn, &mid, "restaurante/plato/detectado", (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
+                sprintf(topic, "restaurante/plato/%ld/detectado", id_ir);
+                mqtt_publish(fsm->mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
                 udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
                 fsm->id_msg++;
             } else {  // Si el estado es diferente y el nuevo es apagado entra aquí
@@ -72,7 +74,8 @@ void send_alert(fsm_t* fsm)
                 mid = envio->id;
                 envio->len = strlen(envio->data);
 
-                mqtt_publish(fsm->mqtt_conn, &mid, "restaurante/plato/retirado", (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
+                sprintf(topic, "restaurante/plato/%ld/retirado", id_ir);
+                mqtt_publish(fsm->mqtt_conn, &mid, topic, (char*) envio, ID_HEADER_LEN + envio->len, 1, 0);
                 udp_packet_send(fsm->conn, (char*) envio, ID_HEADER_LEN + envio->len);
                 fsm->id_msg++;
             }

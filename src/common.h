@@ -1,13 +1,14 @@
 #include <stdint.h>
 
-#define PUERTO_SERVIDOR 3001     /* puerto en el servidor */
-#define PUERTO_CLIENTE  3000     /* puerto en el cliente */
+#define PUERTO_SERVIDOR 3001  /* puerto en el servidor */
+#define PUERTO_CLIENTE  3000  /* puerto en el cliente */
+#define PUERTO_MQTT     1883  /* puerto del broker MQTT */
 
 #define IP6_CI40_CARLOS "fe80::19:f5ff:fe89:1e32"
 #define IP6_CI40_ALDA "fe80::19:f5ff:fe89:1d96"
 #define IP6_CI40 IP6_CI40_ALDA
 
-#define MAXDATASIZE 256 /* maximo numero de bytes que podemos recibir */
+#define MAXDATASIZE 256  /* maximo numero de bytes que podemos recibir */
 
 /* Máscara y prefijo de los dispositivos */
 #define MASK          0xC0
@@ -27,7 +28,7 @@ struct idappdata
     char data[MAXDATASIZE - ID_HEADER_LEN];   /* datos */
 };
 
-/* codigos de operacion (appdata.op) */
+/* codigos de operacion (idappdata.op) */
 // Clicker
 #define OP_WHOAMI_MESA      0x0001  /* ¿Quién soy (clicker mesa)? */
 #define OP_MESA_LLAMA       0x0002  /* La mesa quiere pedir */
@@ -49,10 +50,3 @@ struct idappdata
 // Otros
 #define OP_OK               0xEEEE  /* OK */
 #define OP_ERROR            0xFFFF  /* ERROR */
-
-
-#define BUTTON_CHECK_IRQ(port, pin) __BUTTON_CHECK_IRQ(port, pin)
-/* Check if button1 was pressed */
-#define BUTTON1_CHECK_IRQ() BUTTON_CHECK_IRQ(BUTTON1_PORT, BUTTON1_PIN)
-#define BUTTON2_CHECK_IRQ() BUTTON_CHECK_IRQ(BUTTON2_PORT, BUTTON1_PIN)
-/* Method to be called when button1 is pressed */

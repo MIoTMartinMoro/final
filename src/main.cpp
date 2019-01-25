@@ -141,6 +141,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
   int asigIndex = (int)(strstr(topic, "asignada")-topic);
   int mesaRXindex = (int)(strstr(topic, "mesa")-topic);
   int vaciada = (int)(strstr(topic, "vaciada")-topic);
+  int platoIndex = (int)(strstr(topic, "plato")-topic);
+  char id_pulseraChar[5]={'0','0','0','0','0'};
 
   if(mesaRXindex>0){
     // int indexfinal=(int)(strstr(topic, "//")-topic); //en el primero no existe
@@ -157,7 +159,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     memcpy(IDpulseraRX, topic+asigIndex+strlen("asignada")+1, strlen(topic));
     Serial.print("Numero pulsera recibido: ");
     Serial.println(IDpulseraRX);
-    char id_pulseraChar[5]={'0','0','0','0','0'};
     itoa(DATOS.op
       , id_pulseraChar, 10);
     //sprintf(id_pulseraChar, "%03d", num_pulsera);
@@ -213,7 +214,24 @@ void callback(char* topic, byte* payload, unsigned int length) {
     u8g2.sendBuffer();					// transfer internal memory to the display
     delay(1000);
     }
-  } else{
+  } else if (platoIndex>0){
+    char numplato[5];
+    Serial.println(topic+platoIndex+strlen("plato")+1);
+    memcpy(numplato, topic+platoIndex+strlen("plato")+1, 1);
+    Serial.println(numplato);
+    //if(strcmp(numplato,id_pulseraChar)==0){
+    char printMsg[30];
+    memcpy(printMsg, topic+platoIndex, strlen(topic));
+    //memcpy(printMsg, topic+index, strlen(topic));
+    Serial.println(printMsg);
+    u8g2.begin();
+    u8g2.clearBuffer();					// clear the internal memory
+    u8g2.setFont(u8g2_font_ncenB10_tr);	// choose a suitable font
+    u8g2.drawStr(0,23,printMsg);	// write something to the internal memory
+    u8g2.sendBuffer();					// transfer internal memory to the display
+    delay(1000);
+  //}
+  }else{
     for(int i=0; i<numMisMesas; i++){
       Serial.print("misMesas[] : ");
       Serial.println(misMesas[i]);
@@ -230,10 +248,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
         u8g2.drawStr(0,23,printMsg);	// write something to the internal memory
         u8g2.sendBuffer();					// transfer internal memory to the display
         delay(1000);
-      }
     }
-}
+  }
+
   Serial.println("---------------------------------------------");
+}
 }
 
 void reconnect() {

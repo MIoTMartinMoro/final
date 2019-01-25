@@ -1,8 +1,7 @@
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <letmecreate/click/common.h>
 #include <letmecreate/core/spi.h>
+#include <stdbool.h>
+#include <stdio.h>
 
 #include "mcp3004.h"
 
@@ -15,7 +14,7 @@
 #define VREF 5.0
 #define BITS 1024
 
-int mcp3004_read_channel(uint8_t channel, float* value)
+int8_t mcp3004_read_channel(uint8_t channel, float* value)
 {
     uint8_t tx_buffer[3], rx_buffer[3];
     tx_buffer[0] = START_BYTE;
@@ -31,7 +30,7 @@ int mcp3004_read_channel(uint8_t channel, float* value)
     return 0;
 }
 
-int mcp3004_read_all_channels(float* values, int n)
+int8_t mcp3004_read_all_channels(float* values, uint8_t n)
 {
     uint8_t i;
 

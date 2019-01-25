@@ -28,7 +28,7 @@ struct idappdata
     char data[MAXDATASIZE - ID_HEADER_LEN];   /* datos */
 };
 
-/* codigos de operacion (appdata.op) */
+/* codigos de operacion (idappdata.op) */
 // Clicker
 #define OP_WHOAMI_MESA      0x0001  /* ¿Quién soy (clicker mesa)? */
 #define OP_MESA_LLAMA       0x0002  /* La mesa quiere pedir */

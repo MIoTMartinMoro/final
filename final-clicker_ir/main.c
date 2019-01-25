@@ -27,7 +27,7 @@ MEMB(appdata, struct idappdata, MAXDATASIZE);
 /* Función que compara un array de voltajes con un umbral y pone a 1 la posición que lo supera y a 0 la que no */
 uint8_t convert_values(float* values, int n)
 {
-    uint8_t resp = 0;  // ¡¡MUY IMPORTANTE QUE NO SE STATIC!!
+    uint8_t resp = 0;  // ¡¡MUY IMPORTANTE QUE NO SEA STATIC!!
     static uint8_t i = 0;
 
     for (i = 0; i < n; i++) {  // Para todos lo valores
@@ -101,7 +101,7 @@ int check_sensor(fsm_t* fsm)
     ir_values = convert_values(values, N_PLATOS);  // Los compara con un umbral
     fsm->ir_new_state = ir_values;  // Y los guarda en la variable de nuevo estado
 
-    // Si el nuevo estado es diferente al anterior y además hay al menos 0 encendido devuelve 1, si no 0
+    // Si el nuevo estado es diferente al anterior y además hay al menos uno encendido devuelve 1, si no 0
     return ((fsm->ir_new_state ^ fsm->ir_state) > 0) && ir_values > 0;
 }
 /*---------------------------------------------------------------------------*/
@@ -118,7 +118,7 @@ int check_sensor_none(fsm_t* fsm)
 }
 /*---------------------------------------------------------------------------*/
 /* Función necesaria para usar MQTT */
-void mqtt_event(struct mqtt_connection *m, mqtt_event_t event, void *data)
+void mqtt_event(struct mqtt_connection* m, mqtt_event_t event, void* data)
 {
     
 }
